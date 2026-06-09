@@ -1,15 +1,12 @@
 # Per-app values for example-web (Next.js standalone). CI bumps image.tag.
 image:
   repository: ghcr.io/outegro/example-web
-  tag: "main"
-
+  tag: "94e19ab"
 imagePullSecrets:
   - name: ghcr-pull
-
 ingress:
   enabled: true
   host: example.outegro.com
-
 # Next.js exposes health/metrics under /api
 probes:
   readiness:
@@ -18,7 +15,6 @@ probes:
     path: /api/health
   startup:
     path: /api/health
-
 podMonitor:
   enabled: true
   path: /api/metrics
