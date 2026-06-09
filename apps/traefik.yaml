@@ -43,8 +43,6 @@ spec:
                   permanent: true
           websecure:
             hostPort: 443
-            tls:
-              enabled: true
         # Default certificate for any TLS route without its own cert = our wildcard
         tlsStore:
           default:
