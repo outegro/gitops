@@ -1,0 +1,73 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager
+  namespace: infra
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://charts.jetstack.io
+    chart: cert-manager
+    targetRevision: v1.20.2
+    helm:
+      releaseName: cert-manager
+      values: |
+        crds:
+          enabled: true
+          keep: true
+        global:
+          leaderElection:
+            namespace: infra
+        replicaCount: 1
+        nodeSelector:
+          role: infra
+        tolerations:
+          - key: role
+            operator: Equal
+            value: infra
+            effect: NoSchedule
+        resources:
+          requests:
+            cpu: 20m
+            memory: 64Mi
+          limits:
+            memory: 128Mi
+        webhook:
+          replicaCount: 1
+          nodeSelector:
+            role: infra
+          tolerations:
+            - key: role
+              operator: Equal
+              value: infra
+              effect: NoSchedule
+        cainjector:
+          replicaCount: 1
+          nodeSelector:
+            role: infra
+          tolerations:
+            - key: role
+              operator: Equal
+              value: infra
+              effect: NoSchedule
+        startupapicheck:
+          nodeSelector:
+            role: infra
+          tolerations:
+            - key: role
+              operator: Equal
+              value: infra
+              effect: NoSchedule
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: infra
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
