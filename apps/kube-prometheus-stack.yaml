@@ -1,0 +1,166 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: infra
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: 86.2.1
+    helm:
+      releaseName: kps
+      values: |
+        fullnameOverride: kps
+
+        # k3s doesn't expose these control-plane endpoints for scraping
+        kubeControllerManager:
+          enabled: false
+        kubeScheduler:
+          enabled: false
+        kubeProxy:
+          enabled: false
+        kubeEtcd:
+          enabled: false
+
+        prometheusOperator:
+          nodeSelector:
+            role: infra
+          tolerations:
+            - key: role
+              operator: Equal
+              value: infra
+              effect: NoSchedule
+          admissionWebhooks:
+            patch:
+              nodeSelector:
+                role: infra
+              tolerations:
+                - key: role
+                  operator: Equal
+                  value: infra
+                  effect: NoSchedule
+          resources:
+            requests:
+              cpu: 50m
+              memory: 96Mi
+            limits:
+              memory: 256Mi
+
+        prometheus:
+          prometheusSpec:
+            retention: 7d
+            retentionSize: "8GB"
+            scrapeInterval: 30s
+            nodeSelector:
+              role: infra
+            tolerations:
+              - key: role
+                operator: Equal
+                value: infra
+                effect: NoSchedule
+            serviceMonitorSelectorNilUsesHelmValues: false
+            podMonitorSelectorNilUsesHelmValues: false
+            ruleSelectorNilUsesHelmValues: false
+            probeSelectorNilUsesHelmValues: false
+            resources:
+              requests:
+                cpu: 150m
+                memory: 512Mi
+              limits:
+                memory: 1Gi
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: local-path
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 10Gi
+
+        alertmanager:
+          alertmanagerSpec:
+            nodeSelector:
+              role: infra
+            tolerations:
+              - key: role
+                operator: Equal
+                value: infra
+                effect: NoSchedule
+            resources:
+              requests:
+                cpu: 20m
+                memory: 48Mi
+              limits:
+                memory: 128Mi
+            storage:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: local-path
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 2Gi
+
+        grafana:
+          admin:
+            existingSecret: grafana-admin
+            userKey: admin-user
+            passwordKey: admin-password
+          nodeSelector:
+            role: infra
+          tolerations:
+            - key: role
+              operator: Equal
+              value: infra
+              effect: NoSchedule
+          persistence:
+            enabled: true
+            storageClassName: local-path
+            size: 2Gi
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+
+        kube-state-metrics:
+          nodeSelector:
+            role: infra
+          tolerations:
+            - key: role
+              operator: Equal
+              value: infra
+              effect: NoSchedule
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+
+        prometheus-node-exporter:
+          tolerations:
+            - operator: Exists
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+      - CreateNamespace=false
