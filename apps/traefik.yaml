@@ -1,0 +1,83 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: infra
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://traefik.github.io/charts
+    chart: traefik
+    targetRevision: 40.3.0
+    helm:
+      releaseName: traefik
+      values: |
+        deployment:
+          kind: Deployment
+          replicas: 1
+        nodeSelector:
+          role: infra
+        tolerations:
+          - key: role
+            operator: Equal
+            value: infra
+            effect: NoSchedule
+        # No cloud LB in k3s (servicelb disabled) -> expose via hostPort on VPS1
+        service:
+          enabled: true
+          single: true
+          spec:
+            type: ClusterIP
+        ports:
+          web:
+            hostPort: 80
+            http:
+              redirections:
+                entryPoint:
+                  to: websecure
+                  scheme: https
+                  permanent: true
+          websecure:
+            hostPort: 443
+            tls:
+              enabled: true
+        # Default certificate for any TLS route without its own cert = our wildcard
+        tlsStore:
+          default:
+            defaultCertificate:
+              secretName: wildcard-outegro-com-tls
+        ingressClass:
+          enabled: true
+          isDefaultClass: true
+        providers:
+          kubernetesCRD:
+            enabled: true
+            allowCrossNamespace: true
+          kubernetesIngress:
+            enabled: true
+            publishedService:
+              enabled: true
+        logs:
+          general:
+            level: INFO
+          access:
+            enabled: true
+        resources:
+          requests:
+            cpu: 50m
+            memory: 96Mi
+          limits:
+            memory: 192Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: infra
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
