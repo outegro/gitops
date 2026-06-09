@@ -1,0 +1,6 @@
+apiVersion: v2
+name: outegro-service
+description: Base chart for every self-written Outegro service (NestJS / Next.js) — encodes the zero-downtime deployment conventions (OUTEGRO §4, DEPLOYMENT.md §5).
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

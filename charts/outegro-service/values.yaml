@@ -1,0 +1,99 @@
+# Defaults encode the platform rules; per-app values override image/host/env.
+
+image:
+  repository: "" # e.g. ghcr.io/outegro/example-api  (required)
+  tag: "" # bumped by CI (git sha)                    (required)
+  pullPolicy: IfNotPresent
+
+# imagePullSecrets for GHCR (sealed secret named e.g. ghcr-pull in the namespace)
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+# ≥2 replicas (rule)
+replicaCount: 2
+
+# zero-downtime: a new pod is Ready before an old one goes away
+strategy:
+  maxUnavailable: 0
+  maxSurge: 1
+
+containerPort: 3000
+
+service:
+  port: 80
+
+# Strict node split — every app lands on VPS2.
+nodeSelector:
+  role: apps
+tolerations: []
+affinity: {}
+# Spread replicas across nodes once a 2nd app node exists (no-op on one node).
+topologySpreadConstraints: []
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+# Pod hardening
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop: ["ALL"]
+
+# Health probes (paths served by the app)
+probes:
+  readiness:
+    path: /health
+    initialDelaySeconds: 3
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+  liveness:
+    path: /health
+    initialDelaySeconds: 10
+    periodSeconds: 15
+    timeoutSeconds: 3
+    failureThreshold: 3
+  startup:
+    path: /health
+    periodSeconds: 5
+    failureThreshold: 30
+
+# Graceful shutdown: preStop sleep lets Traefik deregister the endpoint before
+# the app gets SIGTERM; app then drains via enableShutdownHooks.
+terminationGracePeriodSeconds: 40
+preStopSleepSeconds: 8
+
+# Extra env (list of {name,value}) and envFrom (secretRef/configMapRef).
+env: []
+envFrom: []
+
+pdb:
+  minAvailable: 1
+
+ingress:
+  enabled: false
+  host: "" # e.g. example.outegro.com — served on Traefik websecure with the default wildcard cert
+  annotations: {}
+
+# Prometheus scraping of the app's /metrics (kube-prometheus-stack).
+podMonitor:
+  enabled: false
+  path: /metrics
+  interval: 30s
+
+# Optional drizzle migration Job (Helm pre-upgrade/pre-install hook).
+migration:
+  enabled: false
+  command: [] # e.g. ["node","dist/migrate"]
