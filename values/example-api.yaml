@@ -1,7 +1,7 @@
 # Per-app values for example-api (NestJS). CI bumps image.tag to the commit sha.
 image:
   repository: ghcr.io/outegro/example-api
-  tag: "94e19ab"
+  tag: "bc34a5e"
 imagePullSecrets:
   - name: ghcr-pull
 ingress:
