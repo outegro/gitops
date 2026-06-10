@@ -1,7 +1,7 @@
 # Per-app values for example-web (Next.js standalone). CI bumps image.tag.
 image:
   repository: ghcr.io/outegro/example-web
-  tag: "94e19ab"
+  tag: "bc34a5e"
 imagePullSecrets:
   - name: ghcr-pull
 ingress:
