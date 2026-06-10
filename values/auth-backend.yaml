@@ -1,20 +1,16 @@
 # Per-app values for auth-backend (NestJS). CI bumps image.tag to the commit sha.
 image:
   repository: ghcr.io/outegro/auth-backend
-  tag: "94e19ab"
-
+  tag: "bc34a5e"
 imagePullSecrets:
   - name: ghcr-pull
-
 ingress:
   enabled: true
   host: api.outegro.com
-
 # DATABASE_URL / REDIS_URL / JWT_PRIVATE_KEY from the sealed secret.
 envFrom:
   - secretRef:
       name: auth-backend-secrets
-
 env:
   - name: NODE_ENV
     value: production
@@ -26,7 +22,6 @@ env:
     value: .outegro.com
   - name: CORS_ORIGIN
     value: https://auth.outegro.com,https://outegro.com
-
 # Run Drizzle migrations as a pre-sync Job (never on app boot).
 migration:
   enabled: true
