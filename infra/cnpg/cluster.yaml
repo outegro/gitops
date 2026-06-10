@@ -33,6 +33,16 @@ spec:
       max_connections: "200"
       shared_buffers: 128MB
 
+  # Per-service roles (database-per-service). Each service connects with its own
+  # login role; password comes from a sealed basic-auth secret.
+  managed:
+    roles:
+      - name: auth
+        ensure: present
+        login: true
+        passwordSecret:
+          name: auth-db-credentials
+
   # PodMonitor is enabled later, once the prometheus-operator CRDs exist
   monitoring:
     enablePodMonitor: false

@@ -1,0 +1,10 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: auth
+  namespace: infra
+spec:
+  name: auth
+  owner: auth
+  cluster:
+    name: pg

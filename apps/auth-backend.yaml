@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: auth-backend
+  namespace: infra
+  annotations:
+    # After cnpg-cluster (wave 1) so the `auth` DB + role exist before migration.
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/outegro/gitops.git
+      targetRevision: HEAD
+      path: charts/outegro-service
+      helm:
+        releaseName: auth-backend
+        valueFiles:
+          - $values/values/auth-backend.yaml
+    - repoURL: https://github.com/outegro/gitops.git
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+    retry:
+      limit: 8
+      backoff:
+        duration: 15s
+        factor: 2
+        maxDuration: 5m
