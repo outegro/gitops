@@ -1,15 +1,12 @@
 # landing-web (Next.js) at outegro.com. CI bumps image.tag.
 image:
   repository: ghcr.io/outegro/landing-web
-  tag: "main"
-
+  tag: "bc34a5e"
 imagePullSecrets:
   - name: ghcr-pull
-
 ingress:
   enabled: true
   host: outegro.com
-
 probes:
   readiness:
     path: /api/health
