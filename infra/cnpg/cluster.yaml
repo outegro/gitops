@@ -42,6 +42,11 @@ spec:
         login: true
         passwordSecret:
           name: auth-db-credentials
+      - name: notifications
+        ensure: present
+        login: true
+        passwordSecret:
+          name: notifications-db-credentials
 
   # PodMonitor is enabled later, once the prometheus-operator CRDs exist
   monitoring:
