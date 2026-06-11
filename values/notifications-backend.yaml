@@ -1,25 +1,20 @@
 # notifications-backend (NestJS, RabbitMQ consumer). No ingress — internal worker.
 image:
   repository: ghcr.io/outegro/notifications-backend
-  tag: "main"
-
+  tag: "d9a49bc"
 imagePullSecrets:
   - name: ghcr-pull
-
 ingress:
   enabled: false
-
 # DATABASE_URL / RABBITMQ_URL / RESEND_API_KEY / TELEGRAM_BOT_TOKEN from sealed secret.
 envFrom:
   - secretRef:
       name: notifications-backend-secrets
-
 env:
   - name: NODE_ENV
     value: production
   - name: RESEND_FROM
     value: Outegro <noreply@outegro.com>
-
 migration:
   enabled: true
   command: ["node", "dist/db/migrate"]
