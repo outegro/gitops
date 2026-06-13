@@ -74,6 +74,21 @@ spec:
       securityContext:
         fsGroup: 999
       terminationGracePeriodSeconds: 30
+      # fsGroup makes the PV group-writable, but RabbitMQ refuses an
+      # .erlang.cookie that's accessible by anyone but its owner — re-tighten
+      # it on every start (kubelet re-applies fsGroup perms on each (re)mount).
+      initContainers:
+        - name: fix-erlang-cookie-perms
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - "[ -f /var/lib/rabbitmq/.erlang.cookie ] && chmod 600 /var/lib/rabbitmq/.erlang.cookie || true"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/rabbitmq
+          securityContext:
+            runAsUser: 999
       containers:
         - name: rabbitmq
           image: rabbitmq:4.0-management
