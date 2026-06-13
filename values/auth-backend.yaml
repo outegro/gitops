@@ -1,7 +1,7 @@
 # Per-app values for auth-backend (NestJS). CI bumps image.tag to the commit sha.
 image:
   repository: ghcr.io/outegro/auth-backend
-  tag: "e158361"
+  tag: "d61fcf5"
 imagePullSecrets:
   - name: ghcr-pull
 ingress:
