@@ -1,12 +1,15 @@
-# notifications-backend (NestJS, RabbitMQ consumer). No ingress — internal worker.
+# notifications-backend (NestJS). RabbitMQ consumer + Telegram inbound webhook,
+# exposed at tg.outegro.com for Telegram to POST bot updates.
 image:
   repository: ghcr.io/outegro/notifications-backend
   tag: "ad6f9e5"
 imagePullSecrets:
   - name: ghcr-pull
 ingress:
-  enabled: false
-# DATABASE_URL / RABBITMQ_URL / RESEND_API_KEY / TELEGRAM_BOT_TOKEN from sealed secret.
+  enabled: true
+  host: tg.outegro.com
+# DATABASE_URL / RABBITMQ_URL / RESEND_API_KEY / TELEGRAM_BOT_TOKEN /
+# TELEGRAM_WEBHOOK_SECRET / INTERNAL_API_KEY from sealed secret.
 envFrom:
   - secretRef:
       name: notifications-backend-secrets
@@ -15,6 +18,9 @@ env:
     value: production
   - name: RESEND_FROM
     value: Outegro <noreply@outegro.com>
+  # Public URL registered with Telegram via setWebhook on boot.
+  - name: TELEGRAM_WEBHOOK_URL
+    value: https://tg.outegro.com/telegram/webhook
 migration:
   enabled: true
   command: ["node", "dist/db/migrate"]

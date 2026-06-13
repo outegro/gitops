@@ -22,6 +22,9 @@ env:
     value: .outegro.com
   - name: CORS_ORIGIN
     value: https://auth.outegro.com,https://outegro.com
+  # Public bot @username (no @) used to build the Telegram link deep-link.
+  - name: TELEGRAM_BOT_USERNAME
+    value: outegro_bot
 # Run Drizzle migrations as a pre-sync Job (never on app boot).
 migration:
   enabled: true

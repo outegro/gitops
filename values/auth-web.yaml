@@ -11,6 +11,9 @@ env:
   # Server-to-server: talk to auth-backend over the in-cluster service (no internet hop).
   - name: AUTH_API_BASE
     value: http://auth-backend.platform.svc
+  # notifications-backend (in-cluster) — telegram link status/unlink.
+  - name: NOTIFY_API_BASE
+    value: http://notifications-backend.platform.svc
   - name: COOKIE_DOMAIN
     value: .outegro.com
 probes:
