@@ -1,7 +1,7 @@
 # notifications-backend (NestJS, RabbitMQ consumer). No ingress — internal worker.
 image:
   repository: ghcr.io/outegro/notifications-backend
-  tag: "48cba0f"
+  tag: "70fa16c"
 imagePullSecrets:
   - name: ghcr-pull
 ingress:
