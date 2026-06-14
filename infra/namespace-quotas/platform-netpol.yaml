@@ -1,0 +1,31 @@
+# Second enforcement layer (the first is each backend's own JWT verify).
+# Pods in `platform` accept ingress ONLY from trusted namespaces on the http
+# port — never from an arbitrary/compromised pod elsewhere or the public net
+# (backends have no public ingress; only Traefik fronts them).
+#   - infra:         Traefik (api/auth/tg/landing ingress)
+#   - platform:      sibling pods — BFF→backend, notifications→auth /internal
+#   - services:      future subservices → auth-backend (JWKS, /auth/session/alive)
+#   - observability: Prometheus scrape (podMonitor; off today, future-proof)
+# Kubelet health probes are exempt from NetworkPolicy in kube-router (verified
+# on a canary), so no probe rule is needed.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: platform-ingress
+  namespace: platform
+spec:
+  podSelector: {}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: infra }
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: platform }
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: services }
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: observability }
+      ports:
+        - protocol: TCP
+          port: 3000
