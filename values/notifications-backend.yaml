@@ -21,6 +21,11 @@ env:
   # Public URL registered with Telegram via setWebhook on boot.
   - name: TELEGRAM_WEBHOOK_URL
     value: https://tg.outegro.com/telegram/webhook
+# Readiness gated on DB+RabbitMQ (consumer is useless without the broker);
+# liveness stays shallow so a broker blip marks NotReady but doesn't kill the pod.
+probes:
+  readiness:
+    path: /health/deep
 migration:
   enabled: true
   command: ["node", "dist/db/migrate"]
