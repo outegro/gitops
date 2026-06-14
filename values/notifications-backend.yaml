@@ -2,7 +2,7 @@
 # exposed at tg.outegro.com for Telegram to POST bot updates.
 image:
   repository: ghcr.io/outegro/notifications-backend
-  tag: "b11b265"
+  tag: "d6bcc27"
 imagePullSecrets:
   - name: ghcr-pull
 ingress:
