@@ -1,0 +1,33 @@
+# Namespace guardrails for `platform` (auth-backend/web, notifications, landing).
+# LimitRange MUST accompany the ResourceQuota: pods without explicit resources
+# (e.g. the Drizzle migration Job) would otherwise be rejected once a quota with
+# limits.memory exists. Defaults mirror the chart's resources.
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-limits
+  namespace: platform
+spec:
+  limits:
+    - type: Container
+      defaultRequest:
+        cpu: 50m
+        memory: 128Mi
+      default:
+        memory: 256Mi
+---
+# Ceiling so no single app (or a runaway rollout) can exhaust VPS2. Sized well
+# above current usage (8 pods × 50m/128Mi ≈ 400m/1Gi req, 2Gi lim). No
+# limits.cpu in the quota — the chart sets no CPU limit, and tracking it would
+# reject every pod.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: platform-quota
+  namespace: platform
+spec:
+  hard:
+    requests.cpu: "2"
+    requests.memory: 4Gi
+    limits.memory: 6Gi
+    pods: "30"

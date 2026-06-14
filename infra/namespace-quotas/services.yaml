@@ -1,0 +1,28 @@
+# Namespace guardrails for `services` (future subservices). Empty today; the
+# quota caps subservices so they can't starve the platform box on the shared
+# VPS2. LimitRange supplies defaults for pods without explicit resources.
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-limits
+  namespace: services
+spec:
+  limits:
+    - type: Container
+      defaultRequest:
+        cpu: 50m
+        memory: 128Mi
+      default:
+        memory: 256Mi
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: services-quota
+  namespace: services
+spec:
+  hard:
+    requests.cpu: "1"
+    requests.memory: 2Gi
+    limits.memory: 3Gi
+    pods: "20"
