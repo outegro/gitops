@@ -1,7 +1,7 @@
 # auth-web (Next.js) at auth.outegro.com. CI bumps image.tag.
 image:
   repository: ghcr.io/outegro/auth-web
-  tag: "d6bcc27"
+  tag: "b09a90d"
 imagePullSecrets:
   - name: ghcr-pull
 ingress:
