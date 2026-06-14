@@ -16,6 +16,9 @@ env:
     value: http://notifications-backend.platform.svc
   - name: COOKIE_DOMAIN
     value: .outegro.com
+  # Public origin for building redirects (req.url is the internal 0.0.0.0:3000 bind).
+  - name: PUBLIC_ORIGIN
+    value: https://auth.outegro.com
 probes:
   readiness:
     path: /api/health
