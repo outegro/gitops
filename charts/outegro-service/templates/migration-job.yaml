@@ -31,6 +31,11 @@ spec:
         - name: migrate
           image: {{ include "outegro-service.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # Same hardening + limits as the main container (the job runs the same image).
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           command:
             {{- toYaml .Values.migration.command | nindent 12 }}
           {{- with .Values.envFrom }}
