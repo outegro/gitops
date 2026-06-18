@@ -1,0 +1,56 @@
+# Argo CD GitOps control plane.
+
+global:
+  domain: argocd.outegro.internal
+
+redis:
+  enabled: true
+
+controller:
+  replicas: 1
+  env:
+    # Go видит лимит контейнера и активнее чистит heap, не упираясь в hard-OOM.
+    # ~90% от limit (upstream-рекомендация Argo HA). Без этого пик рендера CRD = OOMKill.
+    - name: GOMEMLIMIT
+      value: "1800MiB"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      # Контроллер держит все managed-ресурсы + serverSideDiff огромного CNPG `clusters`
+      # CRD — на 512Mi/1Gi падал. 2Gi с запасом на single-box.
+      memory: 2Gi
+
+server:
+  replicas: 1
+  service:
+    type: ClusterIP
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+repoServer:
+  replicas: 1
+  env:
+    - name: GOMEMLIMIT
+      value: "1800MiB"
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      # Рендерит большие CNPG-манифесты (clusters CRD ~1MB, operator 347KB) — 256Mi его ронял OOM.
+      memory: 2Gi
+
+applicationSet:
+  enabled: true
+
+notifications:
+  enabled: true

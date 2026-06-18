@@ -1,0 +1,64 @@
+# App-of-Apps — корневой Argo CD Application, рекурсит apps/.
+# Применить один раз из корня GitOps repo: kubectl apply -f bootstrap/root.yaml
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: outegro-root
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: outegro-platform
+spec:
+  # AppProject `outegro` создаётся в этом же файле (ниже) → root попадает под его
+  # allow-list (sourceRepos), а не в открытый default.
+  project: outegro
+  source:
+    # Этот же GitOps repo: apps/, values/, manifests/.
+    repoURL: git@github.com:outegro/gitops.git
+    targetRevision: main
+    path: apps
+    directory:
+      recurse: false
+      include: '{*.yaml}'
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+---
+# AppProject — allow-list репозиториев и кластерных ресурсов.
+# В этом MVP — один дефолт, расширяй когда появятся products.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: outegro
+  namespace: argocd
+spec:
+  description: Outegro platform
+  sourceRepos:
+    - git@github.com:outegro/gitops.git
+    - quay.io/jetstack/charts
+    - https://bitnami.github.io/sealed-secrets
+    - https://cloudnative-pg.github.io/charts
+    - https://prometheus-community.github.io/helm-charts
+    - https://grafana.github.io/helm-charts
+    - https://argoproj.github.io/argo-helm
+  destinations:
+    - namespace: '*'
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'

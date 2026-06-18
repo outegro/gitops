@@ -1,0 +1,97 @@
+# Minimal Prometheus alerts for the single-node platform.
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: outegro-platform-alerts
+  namespace: observability
+  labels:
+    release: prometheus
+    app.kubernetes.io/component: rules
+spec:
+  groups:
+    - name: outegro-platform
+      interval: 30s
+      rules:
+        - alert: CertManagerDown
+          expr: |
+            kube_deployment_status_replicas_available{namespace="cert-manager", deployment="cert-manager"} < 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "cert-manager controller is unavailable"
+            description: "cert-manager не выпускает и не продлевает сертификаты."
+
+        - alert: SealedSecretsDown
+          expr: |
+            kube_deployment_status_replicas_available{namespace="kube-system", deployment="sealed-secrets-controller"} < 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Sealed Secrets controller is unavailable"
+            description: "Новые SealedSecret не будут расшифрованы."
+
+        - alert: RedisDown
+          expr: |
+            kube_statefulset_status_replicas_ready{namespace="infra", statefulset="redis"} < 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Redis is unavailable"
+            description: "Redis StatefulSet не имеет ready-реплики."
+
+        - alert: RabbitMQDown
+          expr: |
+            kube_statefulset_status_replicas_ready{namespace="infra", statefulset="rabbitmq-server"} < 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "RabbitMQ is unavailable"
+            description: "RabbitMQ StatefulSet не имеет ready-реплики."
+
+        - alert: PostgresPodDown
+          expr: |
+            kube_pod_status_ready{namespace="infra", pod="outegro-1", condition="true"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Postgres pod is not ready"
+            description: "CNPG pod outegro-1 не готов."
+
+        - alert: PodCrashLooping
+          expr: |
+            rate(kube_pod_container_status_restarts_total[15m]) > 0.1
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is restarting"
+            description: "Контейнер {{ $labels.container }} часто рестартится."
+
+    - name: outegro-node
+      interval: 30s
+      rules:
+        - alert: NodeMemoryHigh
+          expr: |
+            (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.9
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Node memory usage is above 90%"
+            description: "Нода {{ $labels.instance }} близка к OOM."
+
+        - alert: NodeDiskHigh
+          expr: |
+            (1 - (node_filesystem_avail_bytes{fstype!="tmpfs", mountpoint="/"} / node_filesystem_size_bytes{fstype!="tmpfs", mountpoint="/"})) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Root filesystem usage is above 85%"
+            description: "Корневой диск ноды {{ $labels.instance }} заполнен."

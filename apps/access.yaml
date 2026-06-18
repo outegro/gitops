@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  project: outegro
+  sources:
+    - repoURL: https://argoproj.github.io/argo-helm
+      chart: argo-cd
+      targetRevision: 9.5.21
+      helm:
+        valueFiles:
+          - $values/values/access/argocd.yaml
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  # ⚠️ Argo CD управляет собой, но БЕЗ automated sync: авто-самосинк ронял контроллер
+  # (ревертил собственные ресурсы/память по stale-кэшу repo-server). Обновляем Argo CD
+  # осознанно (helm upgrade в bootstrap или ручной sync этого app после смены values).
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+# NetBird вынесен в отдельную финальную главу (8-netbird/) — здесь не деплоится.

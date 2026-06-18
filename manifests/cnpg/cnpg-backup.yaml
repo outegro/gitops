@@ -1,0 +1,42 @@
+# CNPG → R2 backup (ВКЛЮЧЁН). ObjectStore + ScheduledBackup.
+# - barman-плагин стоит в cnpg-system (один ns с оператором) — Argo app `barman-cloud-plugin`.
+# - ObjectStore — в ns кластера (infra). Cluster ссылается на него через
+#   plugins.parameters.barmanObjectName: outegro-r2 (см. cnpg-cluster.yaml).
+# - Бакет `outegro-backups` (CNPG пишет под server-каталог cluster-name → s3://outegro-backups/outegro/).
+# - Креды: sealed-secret `r2-credentials` (infra), ключи ACCESS_KEY_ID / SECRET_ACCESS_KEY.
+# Проверка: kubectl -n infra get cluster outegro \
+#   -o jsonpath='{.status.conditions[?(@.type=="ContinuousArchiving")].status}'  → True
+
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: outegro-r2
+  namespace: infra
+spec:
+  retentionPolicy: "30d"
+  configuration:
+    destinationPath: "s3://outegro-backups"
+    endpointURL: "https://878d418cde10b8c22ffde6b7cfdaa8cd.r2.cloudflarestorage.com"
+    s3Credentials:
+      accessKeyId:
+        name: r2-credentials
+        key: ACCESS_KEY_ID
+      secretAccessKey:
+        name: r2-credentials
+        key: SECRET_ACCESS_KEY
+    wal:
+      compression: gzip
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: outegro-daily-backup
+  namespace: infra
+spec:
+  schedule: "0 0 3 * * *"
+  backupOwnerReference: self
+  cluster:
+    name: outegro
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io

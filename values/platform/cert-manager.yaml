@@ -1,0 +1,20 @@
+# cert-manager values for Cloudflare DNS-01 wildcard certificates.
+
+crds:
+  enabled: true
+  keep: true
+
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: false

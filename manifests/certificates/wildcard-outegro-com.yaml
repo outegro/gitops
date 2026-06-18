@@ -1,0 +1,18 @@
+# Wildcard TLS *.outegro.com (+ apex). cert-manager выпускает через DNS-01
+# (ClusterIssuer letsencrypt-prod) и кладёт Secret `outegro-wildcard-tls` в `platform`
+# — namespace, где живут фронты. Ingress'ы сервис-чарта по умолчанию ссылаются на этот
+# секрет (values.ingress.tlsSecretName). Один серт покрывает все *.outegro.com фронты.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: outegro-wildcard
+  namespace: platform
+spec:
+  secretName: outegro-wildcard-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: "*.outegro.com"
+  dnsNames:
+    - "outegro.com"
+    - "*.outegro.com"

@@ -1,0 +1,125 @@
+# Single-instance Redis — own manifest for the single-node MVP.
+# Session store / rate limits / short-lived state. appendonly + noeviction.
+# Password: secret `redis-credentials` (key `redis-password`).
+# Service DNS stays `redis-master.infra.svc` (same as the old Bitnami chart).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: infra
+  labels:
+    app.kubernetes.io/name: redis
+data:
+  redis.conf: |
+    appendonly yes
+    appendfsync everysec
+    # maxmemory ниже лимита контейнера (256Mi): при переполнении — явная
+    # ошибка записи, а не внезапный OOMKill. noeviction = сессии не выкидываем молча.
+    maxmemory 200mb
+    maxmemory-policy noeviction
+    save ""
+    dir /data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-master
+  namespace: infra
+  labels:
+    app.kubernetes.io/name: redis
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: redis
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  namespace: infra
+  labels:
+    app.kubernetes.io/name: redis
+spec:
+  serviceName: redis-master
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: redis
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+      containers:
+        - name: redis
+          image: redis:7.4-alpine
+          command:
+            - sh
+            - -c
+            - exec redis-server /etc/redis/redis.conf --requirepass "$REDIS_PASSWORD"
+          ports:
+            - name: redis
+              containerPort: 6379
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-credentials
+                  key: redis-password
+          startupProbe:
+            tcpSocket:
+              port: redis
+            periodSeconds: 2
+            failureThreshold: 30
+          livenessProbe:
+            tcpSocket:
+              port: redis
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - redis-cli --no-auth-warning -a "$REDIS_PASSWORD" ping | grep -q PONG
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /etc/redis
+      volumes:
+        - name: config
+          configMap:
+            name: redis-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 5Gi

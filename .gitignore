@@ -1,0 +1,17 @@
+# Этот репозиторий — публично-безопасный GitOps-стейт. Сюда НИКОГДА не попадают:
+#  - расшифрованные (plaintext) секреты,
+#  - публичный сертификат контроллера Sealed Secrets,
+#  - бэкап приватного master-ключа.
+# В Git коммитятся ТОЛЬКО *.sealed.yaml (зашифрованные) — см. manifests/sealed-secrets/.
+
+*-plain.yaml
+*.plain.yaml
+*.plaintext.yaml
+sealed-secrets-pub.pem
+*sealed-secrets-master-key*.yaml
+*.key
+id_ed25519*
+gitops-deploy-key*
+.env
+.env.*
+/tmp/

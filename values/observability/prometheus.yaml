@@ -1,0 +1,68 @@
+# kube-prometheus-stack: Prometheus, Grafana, Alertmanager, kube-state-metrics, node-exporter.
+
+prometheus:
+  prometheusSpec:
+    replicas: 1
+    retention: 7d
+    resources:
+      requests:
+        cpu: 100m
+        memory: 512Mi
+      limits:
+        cpu: 500m
+        memory: 2Gi
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 20Gi
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+
+alertmanager:
+  alertmanagerSpec:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+
+grafana:
+  enabled: true
+  replicas: 1
+  # ⚠️ Grafana subchart ждёт admin.* — НЕ top-level existingSecret. С неверной вложенностью
+  # чарт генерит СЛУЧАЙНЫЙ пароль в Secret/prometheus-grafana при каждом рендере →
+  # вечный OutOfSync на Secret/Deployment prometheus-grafana в Argo.
+  admin:
+    existingSecret: grafana-credentials
+    userKey: admin-user
+    passwordKey: admin-password
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  sidecar:
+    dashboards:
+      enabled: true
+      searchNamespace: observability
+    datasources:
+      enabled: true
+      searchNamespace: observability
+
+nodeExporter:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true
+
+additionalPrometheusRulesMap: {}

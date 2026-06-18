@@ -1,0 +1,22 @@
+# CloudNativePG operator only.
+# The PostgreSQL Cluster, ObjectStore, and ScheduledBackup are plain manifests.
+
+replicaCount: 1
+
+# CRD'ы управляются отдельным app `cnpg-crds` (SSA) — большой `clusters` CRD не влезает
+# в client-side annotation limit, а отдельный app снимает prune-гонки при ре-синках.
+crds:
+  create: false
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+monitoring:
+  podMonitorEnabled: false
+  grafanaDashboard:
+    create: false

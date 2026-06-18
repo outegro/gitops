@@ -1,0 +1,47 @@
+# ClusterIssuer for wildcard certificates via Cloudflare DNS-01.
+# The Cloudflare token Secret must be in the cert-manager namespace because
+# ClusterIssuer reads credentials from cert-manager's cluster resource namespace.
+
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+  labels:
+    app.kubernetes.io/name: cert-manager
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: ops@outegro.com
+    privateKeySecretRef:
+      name: letsencrypt-account-key
+    solvers:
+      - selector:
+          dnsZones:
+            - outegro.com
+        dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              name: cloudflare-api-token
+              key: api-token
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+  labels:
+    app.kubernetes.io/name: cert-manager
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: ops@outegro.com
+    privateKeySecretRef:
+      name: letsencrypt-account-key-staging
+    solvers:
+      - selector:
+          dnsZones:
+            - outegro.com
+        dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              name: cloudflare-api-token
+              key: api-token

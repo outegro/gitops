@@ -1,0 +1,91 @@
+# CloudNativePG cluster (single instance).
+# R2-бэкап ВКЛЮЧЁН: plugins-блок ниже → barman архивирует WAL в ObjectStore `outegro-r2`
+# (см. cnpg-backup.yaml). Требует: barman-плагин в cnpg-system + sealed-secret r2-credentials.
+
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: outegro
+  namespace: infra
+spec:
+  instances: 1
+
+  # WAL-архивация + base-backup в R2 через barman-cloud plugin (ObjectStore outegro-r2).
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: outegro-r2
+
+  storage:
+    size: 50Gi
+    storageClass: local-path
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 2Gi
+
+  postgresql:
+    parameters:
+      max_connections: "200"
+      shared_buffers: "256MB"
+      effective_cache_size: "1GB"
+      maintenance_work_mem: "128MB"
+      work_mem: "8MB"
+      random_page_cost: "1.1"
+      effective_io_concurrency: "200"
+      wal_compression: "on"
+
+  managed:
+    roles:
+      # `app` — bootstrap-роль для платформенного MVP.
+      # ⚠️ DB-per-service (CLAUDE.md): когда появятся auth/payments/notifications —
+      # заводи ОТДЕЛЬНУЮ login-роль на сервис (свой пароль-Secret + свой
+      # `connectionLimit`), а не делай их все `owner: app`. Шаблон Database — внизу файла.
+      - name: app
+        ensure: present
+        login: true
+        passwordSecret:
+          name: app-password
+---
+# ── DB-per-service: рабочий шаблон (раскомментируй на каждый новый сервис) ──
+# 1) Секрет роли — ОБЯЗАТЕЛЬНО type basic-auth + label cnpg.io/reload (иначе
+#    ротация пароля не подхватится). В Git кладётся запечатанным (Sealed Secret).
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: auth-db
+#   namespace: infra
+#   labels:
+#     cnpg.io/reload: "true"
+# type: kubernetes.io/basic-auth
+# stringData:
+#   username: auth
+#   password: "FILL_ME"
+# ---
+# 2) Роль сервиса — добавь в .spec.managed.roles кластера выше (НЕ общий `app`):
+#      - name: auth
+#        ensure: present
+#        login: true
+#        connectionLimit: 20          # свой кап коннектов на сервис
+#        passwordSecret:
+#          name: auth-db
+# ---
+# 3) База, owner = роль сервиса:
+# apiVersion: postgresql.cnpg.io/v1
+# kind: Database
+# metadata:
+#   name: auth
+#   namespace: infra
+# spec:
+#   cluster:
+#     name: outegro
+#   name: auth
+#   owner: auth                       # ← роль сервиса, НЕ `app`
+#   connectionLimit: -1
+# ---
+# Сервис подключается: postgresql://auth:<pw>@outegro-rw.infra.svc:5432/auth
