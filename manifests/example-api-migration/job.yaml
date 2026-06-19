@@ -42,9 +42,9 @@ spec:
             - "ON_ERROR_STOP=1"
             - "-c"
             - |
-              DO $$ BEGIN
+              DO $mig$ BEGIN
                 CREATE TYPE "TaglineJobStatus" AS ENUM ('pending', 'done', 'failed');
-              EXCEPTION WHEN duplicate_object THEN null; END $$;
+              EXCEPTION WHEN duplicate_object THEN null; END $mig$;
               CREATE TABLE IF NOT EXISTS "tagline_jobs" (
                   "id" TEXT NOT NULL,
                   "prompt" TEXT NOT NULL,
