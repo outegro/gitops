@@ -82,6 +82,29 @@ spec:
       prune: true
       selfHeal: true
 ---
+# Traefik default cert = wildcard в kube-system → валидный origin-TLS на ЛЮБОЙ хост
+# (CF Full-strict иначе = 526). После cluster-issuers (wave 2). См. manifests/traefik-default-tls.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik-default-tls
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  project: outegro
+  source:
+    repoURL: git@github.com:outegro/gitops.git
+    targetRevision: main
+    path: manifests/traefik-default-tls
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
 # Wildcard *.outegro.com cert в platform — после issuer (wave 2). Нужен фронтам.
 apiVersion: argoproj.io/v1alpha1
 kind: Application

@@ -1,0 +1,37 @@
+# Traefik default TLS = wildcard *.outegro.com.
+#
+# Зачем: Cloudflare работает в режиме Full (strict) и валидирует сертификат origin'а.
+# Без дефолтного серта Traefik на любой хост БЕЗ конкретного Ingress (включая апекс
+# outegro.com и любой ещё-не-задеплоенный сабдомен) отдаёт свой self-signed
+# «TRAEFIK DEFAULT CERT» → CF рвёт коннект с HTTP 526. Дефолтный серт делает origin
+# валидным на ЛЮБОЙ хост/namespace, а per-Ingress TLS (values.ingress.tlsSecretName)
+# продолжает работать как раньше.
+#
+# Почему kube-system: TLSStore `default` Traefik берёт из своего namespace, и секрет,
+# на который он ссылается, обязан жить в том же namespace (Traefik здесь — kube-system).
+# Поэтому wildcard выпускается отдельной копией в kube-system (cert-manager + DNS-01,
+# тот же ClusterIssuer letsencrypt-prod; дубликат серта *.outegro.com в пределах LE-лимитов).
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: outegro-wildcard
+  namespace: kube-system
+spec:
+  secretName: outegro-wildcard-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: "*.outegro.com"
+  dnsNames:
+    - "outegro.com"
+    - "*.outegro.com"
+---
+apiVersion: traefik.io/v1alpha1
+kind: TLSStore
+metadata:
+  name: default
+  namespace: kube-system
+spec:
+  defaultCertificate:
+    secretName: outegro-wildcard-tls
