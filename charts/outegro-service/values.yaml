@@ -1,0 +1,79 @@
+# Defaults for outegro-service. Override per-app via -f values/<app>.yaml.
+# AUDIT_MINIMAX #56, #57: единый источник правды для деплоя. Раньше — копипаста.
+
+app:
+  name: ""              # required
+  image:
+    repository: ""      # required, e.g. ghcr.io/outegro/auth-backend
+    tag: ""             # required, set by CI
+    pullPolicy: IfNotPresent
+  replicas: 2           # ≥2 per docs/05-deploy-strategy
+  port: 3000
+  # probe paths (override per app if needed)
+  livenessPath: /health
+  readinessPath: /health/deep
+  startupPath: /health
+  # resource defaults — tune per app
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  # env: list of {name, value} or {name, valueFrom} entries
+  env: []
+  # Existing Secret created by SealedSecret. Defaults to "<release>-env".
+  envSecretName: ""
+  # pull secrets for ghcr (sealed `ghcr-pull` in 5-gitops/manifests/sealed-secrets).
+  # Дефолт стоит, чтобы приватные ghcr.io/outegro/* не падали в ImagePullBackOff.
+  imagePullSecrets:
+    - name: ghcr-pull
+
+# service: clusterip (backends) OR clusterip+ingress (fronts)
+service:
+  type: clusterip       # clusterip | clusterip+ingress
+  annotations: {}
+
+# ingress (fronts only — outegro.com / auth.outegro.com / etc.)
+ingress:
+  enabled: false
+  className: traefik
+  host: ""              # e.g. auth.outegro.com
+  tlsSecretName: outegro-wildcard-tls  # wildcard cert from cert-manager
+  annotations: {}
+
+# service account
+serviceAccount:
+  create: true
+  name: ""              # defaults to app.name
+
+# PodDisruptionBudget — single-node: minAvailable:1 protects against
+# voluntary eviction of one pod while another is rolling. On a single
+# node this is mostly a no-op (drain takes the node, not the pod), but
+# it becomes meaningful when you add a 2nd node. Keep it on.
+# AUDIT_MINIMAX #1: формулировка честная.
+pdb:
+  enabled: true
+  minAvailable: 1
+
+# NetworkPolicy. By default: deny-all ingress, allow DNS + infra(pg/redis/rabbitmq) +
+# cross-ns:3000 + external HTTPS egress. Override per app.
+networkPolicy:
+  enabled: true
+  # external 443 (Google OIDC, Resend, Stripe, Telegram). Cluster CIDRs исключены.
+  # Выключи для чисто-внутреннего сервиса, которому наружу не надо.
+  allowExternalHttps: true
+  # extra ingress rules (besides BFF→backend if backend; or Traefik→front if front)
+  extraIngress: []
+  # extra egress rules
+  extraEgress: []
+
+# ServiceMonitor (Prometheus). Enable on backends/fronts you want to monitor.
+serviceMonitor:
+  enabled: false
+  interval: 30s
+  path: /metrics
+
+# Common labels (applied to everything)
+commonLabels: {}

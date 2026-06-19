@@ -1,0 +1,22 @@
+apiVersion: v2
+name: outegro-service
+description: |
+  Базовый чарт для всех self-written сервисов outegro (бэки и фронты).
+  Инкапсулирует: Deployment (rolling, probes, resources, security context),
+  Service (ClusterIP для бэков, ClusterIP+Ingress для вебов), ServiceAccount,
+  NetworkPolicy, ServiceMonitor (если Prometheus скрейпит), PodDisruptionBudget.
+
+  Использование:
+    helm template auth-backend ./charts/outegro-service \
+      --set app.name=auth-backend \
+      --set app.image.repository=ghcr.io/outegro/auth-backend \
+      --set app.image.tag=abc1234 \
+      --set app.service.type=clusterip \
+      --set app.env[0].name=DATABASE_URL --set app.env[0].value=postgresql://...
+
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords: [outegro, helm, k8s]
+maintainers:
+  - name: outegro

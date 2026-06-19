@@ -1,0 +1,61 @@
+# Self-written services (outegro-service chart + per-app values). Wave 8 — after
+# all infra (secrets/CNPG/Redis/RabbitMQ). Throwaway demo: example-api + landing-web.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: example-api
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  project: outegro
+  sources:
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      path: charts/outegro-service
+      helm:
+        releaseName: example-api
+        valueFiles:
+          - $values/values/services/example-api.yaml
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: landing-web
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  project: outegro
+  sources:
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      path: charts/outegro-service
+      helm:
+        releaseName: landing-web
+        valueFiles:
+          - $values/values/services/landing-web.yaml
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

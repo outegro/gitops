@@ -1,0 +1,63 @@
+# One-off, idempotent migration for the throwaway example-api DB.
+# NOT synced by any Argo app — apply manually once the `example-api-env` secret exists:
+#   kubectl apply -f manifests/example-api-migration/job.yaml
+#   kubectl -n platform wait --for=condition=complete job/example-api-migrate --timeout=120s
+#   kubectl -n platform logs job/example-api-migrate
+# Re-runnable: CREATE TYPE is guarded, CREATE TABLE/INDEX use IF NOT EXISTS.
+# Mirrors prisma/migrations/0001_init/migration.sql (tagline_jobs).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: example-api-migrate
+  namespace: platform
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: example-api-migrate
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 70 # postgres user in the alpine image
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: migrate
+          image: postgres:18-alpine
+          imagePullPolicy: IfNotPresent
+          env:
+            # Reuse the app's own connection string (example role owns the example DB).
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: example-api-env
+                  key: DATABASE_URL
+          command: ["psql"]
+          args:
+            - "$(DATABASE_URL)"
+            - "-v"
+            - "ON_ERROR_STOP=1"
+            - "-c"
+            - |
+              DO $$ BEGIN
+                CREATE TYPE "TaglineJobStatus" AS ENUM ('pending', 'done', 'failed');
+              EXCEPTION WHEN duplicate_object THEN null; END $$;
+              CREATE TABLE IF NOT EXISTS "tagline_jobs" (
+                  "id" TEXT NOT NULL,
+                  "prompt" TEXT NOT NULL,
+                  "status" "TaglineJobStatus" NOT NULL DEFAULT 'pending',
+                  "taglines" TEXT[],
+                  "error" TEXT,
+                  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                  "completedAt" TIMESTAMP(3),
+                  CONSTRAINT "tagline_jobs_pkey" PRIMARY KEY ("id")
+              );
+              CREATE INDEX IF NOT EXISTS "tagline_jobs_status_idx" ON "tagline_jobs"("status");
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]

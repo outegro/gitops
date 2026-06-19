@@ -51,6 +51,27 @@ spec:
         login: true
         passwordSecret:
           name: app-password
+      # `example` — выделенная роль для throwaway-демо example-api (DB-per-service).
+      # Удаляется вместе с example-api.
+      - name: example
+        ensure: present
+        login: true
+        connectionLimit: 20
+        passwordSecret:
+          name: example-db-app
+---
+# DB-per-service: своя база для example-api (owner = роль example, НЕ общий `app`).
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: example
+  namespace: infra
+spec:
+  cluster:
+    name: outegro
+  name: example
+  owner: example
+  connectionLimit: -1
 ---
 # ── DB-per-service: рабочий шаблон (раскомментируй на каждый новый сервис) ──
 # 1) Секрет роли — ОБЯЗАТЕЛЬНО type basic-auth + label cnpg.io/reload (иначе

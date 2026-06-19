@@ -1,0 +1,9 @@
+{{ include "outegro.fullname" . }} deployed (image {{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}, {{ .Values.app.replicas }} replicas).
+
+Service (ClusterIP):   {{ include "outegro.fullname" . }}.{{ .Release.Namespace }}.svc:80
+{{- if .Values.ingress.enabled }}
+Ingress:               https://{{ .Values.ingress.host }}
+{{- end }}
+
+Check rollout:
+  kubectl -n {{ .Release.Namespace }} rollout status deploy/{{ include "outegro.fullname" . }}

@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "outegro.fullname" . }}
+  labels: {{- include "outegro.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.app.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "outegro.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels: {{- include "outegro.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "outegro.serviceAccountName" . }}
+      {{- with .Values.app.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: {{ include "outegro.name" . }}
+          image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}"
+          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.app.port }}
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: {{ default (printf "%s-env" (include "outegro.fullname" .)) .Values.app.envSecretName | quote }}
+                # optional: a front (BFF) may carry no secrets of its own. A backend
+                # that needs env still fails fast on boot (Zod) if the secret is absent.
+                optional: true
+          {{- with .Values.app.env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            {{- include "outegro.probe" (dict "path" .Values.app.livenessPath "initialDelaySeconds" 10 "periodSeconds" 20) | nindent 12 }}
+          readinessProbe:
+            {{- include "outegro.probe" (dict "path" .Values.app.readinessPath "initialDelaySeconds" 5 "periodSeconds" 10) | nindent 12 }}
+          startupProbe:
+            {{- include "outegro.probe" (dict "path" .Values.app.startupPath "initialDelaySeconds" 0 "periodSeconds" 5 "failureThreshold" 30) | nindent 12 }}
+          resources:
+            {{- toYaml .Values.app.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          lifecycle:
+            preStop:
+              # Give Traefik time to deregister the endpoint before we exit.
+              sleep:
+                seconds: 5

@@ -20,8 +20,13 @@
 | `redis-credentials.sealed.yaml` | infra | Redis auth |
 | `grafana-credentials.sealed.yaml` | observability | Grafana admin |
 | `ghcr-pull.sealed.yaml` | platform | pull приватных образов `ghcr.io/outegro/*` |
+| `example-db-app.sealed.yaml` | infra | CNPG роль `example` (throwaway example-api) |
+| `example-api-env.sealed.yaml` | platform | example-api: DATABASE_URL/REDIS_URL/RABBITMQ_URL |
+| `example-api-ai.sealed.yaml` | platform | example-api: `MINIMAX_API_KEY` (ключ модели) |
 
 > RabbitMQ-секрета здесь нет — его генерит оператор (`rabbitmq-default-user`).
+> Три `example-*` секрета — для throwaway-демо (глава 6). Как их запечатать —
+> в `manifests/example-api-migration/RUNBOOK.md`.
 
 ## Bootstrap vs GitOps
 

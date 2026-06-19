@@ -1,0 +1,37 @@
+# example-api — throwaway AI Tagline Generator (PG + Redis + RabbitMQ + MiniMax).
+# ClusterIP only (no ingress): landing-web BFF calls it in-cluster.
+app:
+  name: example-api
+  image:
+    repository: ghcr.io/outegro/example-api
+    tag: "643b6b1f82cb7c0c2a8b0f7fc3a8cf0bacad8be6"
+  replicas: 2
+  port: 3000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 192Mi
+    limits:
+      cpu: 500m
+      memory: 384Mi
+  # DATABASE_URL / REDIS_URL / RABBITMQ_URL come from this sealed Secret (envFrom).
+  envSecretName: example-api-env
+  env:
+    - name: NODE_ENV
+      value: "production"
+    - name: MINIMAX_BASE_URL
+      value: "https://api.minimax.io/v1"
+    - name: MINIMAX_MODEL
+      value: "MiniMax-M2.7"
+    - name: MINIMAX_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: example-api-ai
+          key: MINIMAX_API_KEY
+
+service:
+  type: clusterip
+
+networkPolicy:
+  enabled: true
+  allowExternalHttps: true # egress to api.minimax.io
