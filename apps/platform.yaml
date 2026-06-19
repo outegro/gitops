@@ -199,6 +199,10 @@ metadata:
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "5"
+    # Оператор CNPG домутирует Cluster spec (раздувает postgresql.parameters ~8→35,
+    # добавляет managed.roles defaults). client-side diff видит это как дрейф → вечный
+    # OutOfSync. ServerSideDiff сравнивает только Argo-managed поля (как у prometheus).
+    argocd.argoproj.io/compare-options: ServerSideDiff=true
 spec:
   project: outegro
   source:
