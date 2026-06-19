@@ -22,7 +22,7 @@ app:
     - name: MINIMAX_BASE_URL
       value: "https://api.minimax.io/v1"
     - name: MINIMAX_MODEL
-      value: "MiniMax-M2.7"
+      value: "MiniMax-M3"
     - name: MINIMAX_API_KEY
       valueFrom:
         secretKeyRef:
