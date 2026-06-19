@@ -19,6 +19,7 @@ Argo усыновляет уже стоящие ресурсы — поэтом�
 | `cnpg-operator` | `helm.releaseName: cnpg`, `crds.create:false`, ns `cnpg-system`, `ServerSideApply=true` | совпасть с ручным релизом; ns = где живёт barman-plugin |
 | `cnpg-cluster` | `ServerSideApply=true` + аннотация `compare-options: ServerSideDiff=true` | оператор раздувает `Cluster.spec` (~8→35 параметров) → без SSDiff вечный ложный OutOfSync |
 | `prometheus` | `ServerSideApply=true` + аннотация `compare-options: ServerSideDiff=true` | большие CRD дают ложный OutOfSync на client-side diff |
+| `traefik-default-tls` | Certificate + `TLSStore default` в `kube-system` (ns Traefik) | дефолтный origin-серт; иначе self-signed → Cloudflare Full-strict 526 |
 | `argocd` | без блока `automated` | авто-self-heal Argo по себе ронял контрол-плейн |
 | argocd values | controller/repoServer 2Gi + GOMEMLIMIT | OOM на больших манифестах |
 
@@ -52,7 +53,7 @@ kubectl -n argocd get appproject outegro
 kubectl -n argocd get applications
 ```
 
-## 4. Дождаться конвергенции (~18 apps, все Synced/Healthy)
+## 4. Дождаться конвергенции (~19 apps, все Synced/Healthy)
 
 ```bash
 watch -n5 'kubectl -n argocd get applications \
@@ -60,10 +61,16 @@ watch -n5 'kubectl -n argocd get applications \
 ```
 
 ```text
-outegro-root  sealed-secrets  secrets  cert-manager  cluster-issuers  certificates
-cnpg-crds  cnpg-operator  barman-cloud-plugin  cnpg-cluster  redis  rabbitmq-operator
-rabbitmq  prometheus  loki  alloy  prometheus-rules  argocd
+outegro-root  sealed-secrets  secrets  cert-manager  cluster-issuers  traefik-default-tls
+certificates  cnpg-crds  cnpg-operator  barman-cloud-plugin  cnpg-cluster  redis
+rabbitmq-operator  rabbitmq  prometheus  loki  alloy  prometheus-rules  argocd
 ```
+
+> `traefik-default-tls` (wave 3) выпускает wildcard в `kube-system` и ставит `TLSStore default` →
+> Traefik отдаёт `*.outegro.com` как **дефолтный** серт origin'а. Без него любой хост без своего Ingress
+> (апекс `outegro.com`, ещё-не-задеплоенные сабдомены) отдаёт self-signed → Cloudflare Full(strict) = **526**.
+> Проверка: `echo | openssl s_client -connect <IP>:443 -servername outegro.com 2>/dev/null | openssl x509 -noout -subject`
+> → `CN=*.outegro.com`; снаружи `curl -sI https://outegro.com` → 404 от Traefik (не 526).
 
 ## 5. Если что-то OutOfSync
 
