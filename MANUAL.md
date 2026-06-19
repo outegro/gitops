@@ -17,7 +17,7 @@ Argo усыновляет уже стоящие ресурсы — поэтом�
 | `sealed-secrets` | `helm.releaseName: sealed-secrets-controller` | совпасть с ручным релизом — иначе immutable-селектор |
 | `cnpg-crds` | `ServerSideApply=true`, `prune:false` | CRD ~1МБ не лезет в client-side |
 | `cnpg-operator` | `helm.releaseName: cnpg`, `crds.create:false`, ns `cnpg-system`, `ServerSideApply=true` | совпасть с ручным релизом; ns = где живёт barman-plugin |
-| `cnpg-cluster` | `ServerSideApply=true` | оператор домутирует spec → ложный дрейф |
+| `cnpg-cluster` | `ServerSideApply=true` + аннотация `compare-options: ServerSideDiff=true` | оператор раздувает `Cluster.spec` (~8→35 параметров) → без SSDiff вечный ложный OutOfSync |
 | `prometheus` | `ServerSideApply=true` + аннотация `compare-options: ServerSideDiff=true` | большие CRD дают ложный OutOfSync на client-side diff |
 | `argocd` | без блока `automated` | авто-self-heal Argo по себе ронял контрол-плейн |
 | argocd values | controller/repoServer 2Gi + GOMEMLIMIT | OOM на больших манифестах |
@@ -76,6 +76,19 @@ kubectl -n argocd patch application <app> --type merge -p '{"operation":null}'
 # ручной sync без force; force несовместим с ServerSideApply:
 kubectl -n argocd patch application <app> --type merge \
   -p '{"operation":{"sync":{"syncStrategy":{"apply":{}}}}}'
+```
+
+### `argocd` self-app остаётся OutOfSync после bootstrap — это НОРМА, нужен разовый adopt
+
+Argo CD ставился руками `helm` (глава 4) → live ConfigMap'ы/Secret'ы несут helm-метаданные ≠ rendered,
+а у app `argocd` намеренно НЕТ `automated` sync (авто-self-heal по себе ронял argocd). Усынови **разово**
+(стратегия `apply` = 3-way merge, НЕ replace/force — runtime-ключи `argocd-secret` server.secretkey/admin
+сохраняются, поды не рестартят в краш):
+
+```bash
+kubectl -n argocd patch application argocd --type merge \
+  -p '{"operation":{"sync":{"syncStrategy":{"apply":{}}}}}'
+# через ~15с → Synced/Healthy
 ```
 
 ## Готово, когда
