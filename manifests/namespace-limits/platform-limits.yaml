@@ -1,0 +1,39 @@
+# Single-box guardrail: cap what the `platform` namespace (self-written apps) can
+# consume, so a runaway/leaking app pod can't starve the infra (Postgres/Redis/
+# RabbitMQ/observability) that shares the same node. Node = 5 CPU / ~7.9Gi.
+#
+# ResourceQuota + LimitRange go together: once a quota sets limits.cpu/memory, EVERY
+# pod MUST declare limits or it's rejected. The LimitRange supplies defaults so pods
+# without explicit resources (e.g. one-off Jobs) still get bounded and admitted.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: platform-quota
+  namespace: platform
+spec:
+  hard:
+    requests.cpu: "2"
+    requests.memory: 2Gi
+    limits.cpu: "4"
+    limits.memory: 3Gi
+    pods: "20"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: platform-limits
+  namespace: platform
+spec:
+  limits:
+    - type: Container
+      # Applied to pods that don't set their own (existing app pods keep their chart values).
+      defaultRequest:
+        cpu: 50m
+        memory: 64Mi
+      default:
+        cpu: 500m
+        memory: 512Mi
+      # A single container can't exceed this → one bad pod can't claim the whole node.
+      max:
+        cpu: "2"
+        memory: 1Gi

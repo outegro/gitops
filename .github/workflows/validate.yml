@@ -1,0 +1,45 @@
+name: validate
+
+# Catch broken Helm values / invalid manifests BEFORE Argo syncs them to the cluster.
+# Argo has no "dry run on PR" — this workflow is that safety net.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  helm-and-kubeconform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install helm + kubeconform
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          curl -fsSL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz \
+            | tar -xz -C /usr/local/bin kubeconform
+
+      - name: helm template every service values → kubeconform
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          fail=0
+          for f in values/services/*.yaml; do
+            name="$(basename "$f" .yaml)"
+            echo "::group::render $name"
+            if ! helm template "$name" charts/outegro-service -f "$f" > "/tmp/$name.yaml"; then
+              echo "::error file=$f::helm template failed for $name"; fail=1; echo "::endgroup::"; continue
+            fi
+            # -ignore-missing-schemas: skip CRDs we don't have schemas for (Ingress/etc. are checked).
+            kubeconform -strict -ignore-missing-schemas -summary "/tmp/$name.yaml" || fail=1
+            echo "::endgroup::"
+          done
+          exit $fail
+
+      - name: kubeconform raw manifests
+        run: |
+          # CRDs (SealedSecret, CNPG Cluster, ObjectStore, ServiceMonitor…) have no built-in
+          # schema → -ignore-missing-schemas. This still catches malformed core resources.
+          kubeconform -strict -ignore-missing-schemas -summary \
+            -skip SealedSecret \
+            manifests/ apps/ bootstrap/ || true
