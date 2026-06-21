@@ -95,4 +95,17 @@ nodeExporter:
 kubeStateMetrics:
   enabled: true
 
+# k3s bundles control-plane components into one process and does NOT expose them as
+# separate scrape targets → these monitors fail and fire false-positive *Down alerts
+# (KubeScheduler/KubeProxy/KubeControllerManager/etcd Down). Disable both their
+# ServiceMonitors AND the associated default rules so they don't spam Telegram.
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+kubeEtcd:
+  enabled: false
+
 additionalPrometheusRulesMap: {}
