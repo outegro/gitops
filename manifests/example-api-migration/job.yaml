@@ -29,12 +29,14 @@ spec:
           image: postgres:18-alpine
           imagePullPolicy: IfNotPresent
           env:
-            # Reuse the app's own connection string (example role owns the example DB).
+            # DDL goes DIRECT to Postgres (outegro-rw), bypassing pgbouncer — the app's
+            # DATABASE_URL points at the transaction-mode pooler, which isn't ideal for
+            # migrations (locks/session state). DATABASE_URL_DIRECT is the direct one.
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: example-api-env
-                  key: DATABASE_URL
+                  key: DATABASE_URL_DIRECT
           command: ["psql"]
           args:
             - "$(DATABASE_URL)"
