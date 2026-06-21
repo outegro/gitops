@@ -4,7 +4,7 @@ app:
   name: example-api
   image:
     repository: ghcr.io/outegro/monorepo/example-api
-    tag: "7f3d116609090c299c22096dd03c8eb1d4b0b528"
+    tag: "9195c3e938a193d16c53c0c20ac80515db2b6ad6"
   replicas: 2
   port: 3000
   resources:
