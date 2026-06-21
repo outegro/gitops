@@ -39,6 +39,10 @@ alertmanager:
       - outegro-telegram-alert
   # Route ALL alerts to a single Telegram receiver. Group by alert+namespace so a
   # burst collapses into one message; re-notify an ongoing alert at most every 4h.
+  # NB: this REPLACES the chart's default config. The default `route.routes` muted
+  # the always-firing `Watchdog` to a `null` receiver; we must keep BOTH that route
+  # AND a `null` receiver, else the operator rejects the config with
+  # "undefined receiver null used in route".
   config:
     route:
       receiver: telegram
@@ -46,7 +50,13 @@ alertmanager:
       group_wait: 30s
       group_interval: 5m
       repeat_interval: 4h
+      routes:
+        # Watchdog is a synthetic always-on alert (pipeline heartbeat) — don't spam TG.
+        - receiver: "null"
+          matchers:
+            - alertname = "Watchdog"
     receivers:
+      - name: "null"
       - name: telegram
         telegram_configs:
           - bot_token_file: /etc/alertmanager/secrets/outegro-telegram-alert/token
