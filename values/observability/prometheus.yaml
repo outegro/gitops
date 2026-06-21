@@ -51,10 +51,11 @@ alertmanager:
       group_interval: 5m
       repeat_interval: 4h
       routes:
-        # Watchdog is a synthetic always-on alert (pipeline heartbeat) — don't spam TG.
+        # Watchdog (pipeline heartbeat) and InfoInhibitor (inhibit helper) are synthetic
+        # always-on alerts, never actionable — mute to null so they don't spam Telegram.
         - receiver: "null"
           matchers:
-            - alertname = "Watchdog"
+            - alertname =~ "Watchdog|InfoInhibitor"
     receivers:
       - name: "null"
       - name: telegram
