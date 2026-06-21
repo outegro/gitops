@@ -1,0 +1,18 @@
+# Telegram bot token for Alertmanager → Telegram alerts.
+# Decrypts to Secret `outegro-telegram-alert` (key: token) in `observability`,
+# mounted into Alertmanager via values/observability/prometheus.yaml
+# (alertmanager.alertmanagerSpec.secrets) at
+# /etc/alertmanager/secrets/outegro-telegram-alert/token.
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: outegro-telegram-alert
+  namespace: observability
+spec:
+  encryptedData:
+    token: AgB9BvttIN9ce+H7hgzYnlqbiV+84CmAp4N78w9Z/W8b4sIsFrDN4QZ55IEAhVDsiX6Z+ru8UjwgyCl4y9ZaW9wSUp4VAullL9ev6S4Zp3xGjj6SZL3cnIpWnwLu/1Ke0vgk2sG9smVi9DO6bGt66RkV6W0RyxHDlUCDDanb9YtUocAsKLYJFVXOo7Cuv7uUdViynC8F/3+Q/g7qQ2UTyW2H+LyaVGmVJJs63h3LrlNgCk5xNz0F0sMwZzWPb0kWXjSITjXDHYn5yOfuLvS/37QZyc/p0sdwyIMIQpHQhv9pNFmPjy6kvc9nIW5Mv/BQkUExhOVAEDQK5AiE5PSSpig4ewypp+C79GYnGy4W4Ttym0W0lMVVjvfKnDFef5Fu96iPlu+0Q3lX6t2bHpOTtILzQtXZ+TeaIjCs/HYfZUaaWMBERcB+ofKX3w1VT4c9br6sVC1OwNZMY/Jq7RZRPyreC63j4uiec+AZHgPE+7ZJpUFxacadk6RvviyPuNnMlhxqwLOSg3FlBHy296MvanNvDSjqzguCHktt3LSMZfuANIHpCmMWmf4vM7Z4FAbhSjxWmDmZIq37keT3V7603gqggTcCh/rKXx6VZOuDj3SywhwWw37fpHzHuZxoLSwhGpYYWd8WUxcZ6m2By50n5L8Bs/sgaVKxprrbRsh1iPhH4iuUhCT+gD4WP3GUlczhxF8heL7SzjzPlPBjDcaD6llr97EcRS5Ow196NV0qWMH2D9ZoIOF4fi4juSz4/xRh
+  template:
+    metadata:
+      name: outegro-telegram-alert
+      namespace: observability
