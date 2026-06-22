@@ -20,14 +20,10 @@ app:
     limits:
       cpu: 500m
       memory: 384Mi
-  # BFF has no secrets of its own; it talks to example-api over ClusterIP.
+  # Pure front hub — no backend, no secrets of its own.
   env:
     - name: NODE_ENV
       value: "production"
-    - name: API_BASE
-      # ClusterIP service listens on :80 → targetPort 3000. (Earlier :3000 hit the
-      # pod port, not the service → connection refused → BFF 503.)
-      value: "http://example-api.platform.svc.cluster.local"
   # No envFrom secret needed — point at a dummy so the chart's secretRef is optional.
   envSecretName: landing-web-env
 
