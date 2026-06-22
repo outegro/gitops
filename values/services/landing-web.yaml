@@ -3,7 +3,7 @@ app:
   name: landing-web
   image:
     repository: ghcr.io/outegro/monorepo/landing-web
-    tag: "7f3d116609090c299c22096dd03c8eb1d4b0b528"
+    tag: "1aed2ed4f4083a33f0bab079c8fa4be85609de06"
   replicas: 2
   port: 3000
   # Probes hit "/" (SSR shell, always 200 while the Next server is up). We deliberately
@@ -26,16 +26,13 @@ app:
       value: "production"
   # No envFrom secret needed — point at a dummy so the chart's secretRef is optional.
   envSecretName: landing-web-env
-
 service:
   type: clusterip+ingress
-
 ingress:
   enabled: true
   className: traefik
   host: outegro.com
   tlsSecretName: outegro-wildcard-tls
-
 networkPolicy:
   enabled: true
   allowExternalHttps: false
