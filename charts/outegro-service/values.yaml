@@ -69,6 +69,15 @@ networkPolicy:
   # extra egress rules
   extraEgress: []
 
+# Prisma migrate-deploy as an Argo PreSync hook (runs before each rollout). Enable
+# per backend that has migrations; needs `prisma` + prisma.config.ts in the image.
+migration:
+  enabled: false
+  databaseUrlKey: DATABASE_URL_DIRECT # key in the env secret (direct, bypass pooler)
+  backoffLimit: 3
+  activeDeadlineSeconds: 300
+  # resources: {}   # defaults to app.resources
+
 # ServiceMonitor (Prometheus). Enable on backends/fronts you want to monitor.
 serviceMonitor:
   enabled: false

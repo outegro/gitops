@@ -1,0 +1,17 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: auth-db
+  namespace: infra
+spec:
+  encryptedData:
+    password: AgBwWQrDcjReHY/bVQ1MBKQ0zXVaLfEUhYioZPfGHXdGn2ePjUiCte60T7YnA75rXcgmPBYZAUqdx4/ymYaxL335YsNIr631rJ67ZsDfUVzwm36jxr6dnT8wpQ1pc0n4LYpQbaCQVVenzUFoaZ7y70yLzIZJUVnAjXHBlSaKKT3okx2ikzlZdJJzc35wZbYZsu6zaX9FlJio5lU0EL3AVjcanRsIz4mMJQKBx6mJS/SK14R+64VN2lsnhVwJMEhQvQdlnE68xpn/MkL8e/DZ/Cl3jT2waz6U9UdD+OGrhsyVWlcIf+4u4/hZ4Fm0B1nyOIL3HZtvL9zbASyd8jnOeqtRH37Q/opvfD1QyrzExV3uK9fCRwW9LfM2Qwvz/5SFp+r+4cOS3EkstvII+6RMzqR4g2NFVzrxbBD+EOLk8UByokQxfEOHEIa8RparrOqWotNbc+JWpnDFcFbBYJ5yzI4rq859TddfIqURyOzba/lIXWqOqUcPSkVvgnyUko0liFAZO/mZwwk6FBgSz9Gca1vE230tG9G+8Wr6dM3qNh5toA/0fJb/JIEUL2QXm4jocAhJxVn3pvka3D4WFqt/M7THzZNTq1/Mdxalu4FkUqn4NziWOILAqr4vKsd87hjfpkN5d4R5K6l2IO51qrosMLhdPw9y1szd7DKpjOQrderIs/tG5FGY/kKXDcFNF4OOOUSkoggDmmV3BBati7JI7gtX3dOz8xGZ8yIYAtl6jlRfkQ==
+    username: AgCAKB+AKDbgwoCwqE3jxEHZmKMLX+eM6NfQjVm4yd5xXW87Vkp6CROBeMC6a9LrF2nyyZnC0PM/81MoMyLPbsRGwec81Li4mbdb5+jA5HgOkik17qWt2o3uiA5dEO9iPDLHwnqH1ubDqOQCW3igdxDkVVSY47HYlzs90KUGHfiP3zqpE8ztA8CwIryulOqHLK9cb1CE87NVUXcuFxYUsUgTFerkxDAZUH9arwvsZhy+jBzZJq69V0AkpQ4nJpIIsb8JXMI3BB4qE7FidRsc8ttF7bZVeP71OSB/f3QUpcB/FuarlL+YxNwinjOZNDzcv5N04rxZdafMAFRuZIGAEDQIoHCvWyOBsjApHcfwG0M/rHPKLYKHppRwlrOh8TM7yaEkgUlDaMEhvRMAWXZ0bVTFK56756u0gCderX50sXWV4+j0pwPFls5OM+cE6bNvPjG2oXf6OUudZ8qkdMN4k06/0YviemVjlKCCKyGkwsm82JLNn6I4B6JBqwUrrSAAAcnpG1gcuWQMSYyfuo/wvX3kVjvrDbO6NL8dIXyPO8MLsfYX0tH8dLGvIr4YP5VusOl4CccuRsceWvDqjoexBV/ZFehnOsFT6bDhMw/xcY5mR+PZdXxmnTxO+eeZjVUlcY3YcE5glP/KKTIFRABGY1hlqa3AomYiEvZSEX+AgS3B1cAkhHEeVxMvhRmc1gImg74VgOES
+  template:
+    metadata:
+      labels:
+        cnpg.io/reload: "true"
+      name: auth-db
+      namespace: infra
+    type: kubernetes.io/basic-auth

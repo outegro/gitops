@@ -30,3 +30,153 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: auth-backend
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  project: outegro
+  sources:
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      path: charts/outegro-service
+      helm:
+        releaseName: auth-backend
+        valueFiles:
+          - $values/values/services/auth-backend.yaml
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: notifications-backend
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  project: outegro
+  sources:
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      path: charts/outegro-service
+      helm:
+        releaseName: notifications-backend
+        valueFiles:
+          - $values/values/services/notifications-backend.yaml
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: payments-backend
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  project: outegro
+  sources:
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      path: charts/outegro-service
+      helm:
+        releaseName: payments-backend
+        valueFiles:
+          - $values/values/services/payments-backend.yaml
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: id-web
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  project: outegro
+  sources:
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      path: charts/outegro-service
+      helm:
+        releaseName: id-web
+        valueFiles:
+          - $values/values/services/id-web.yaml
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pay-web
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  project: outegro
+  sources:
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      path: charts/outegro-service
+      helm:
+        releaseName: pay-web
+        valueFiles:
+          - $values/values/services/pay-web.yaml
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

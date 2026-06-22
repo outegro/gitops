@@ -51,8 +51,62 @@ spec:
         login: true
         passwordSecret:
           name: app-password
-      # DB-per-service: добавляй login-роль на каждый сервис (auth/notifications/payments),
-      # свой пароль-Secret + свой connectionLimit. Шаблон — внизу файла.
+      # DB-per-service: своя login-роль на каждый сервис (пароль — sealed `<svc>-db`).
+      - name: auth
+        ensure: present
+        login: true
+        connectionLimit: 20
+        passwordSecret:
+          name: auth-db
+      - name: notifications
+        ensure: present
+        login: true
+        connectionLimit: 20
+        passwordSecret:
+          name: notifications-db
+      - name: payments
+        ensure: present
+        login: true
+        connectionLimit: 20
+        passwordSecret:
+          name: payments-db
+---
+# DB-per-service databases (owner = соответствующая login-роль, НЕ общий `app`).
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: auth
+  namespace: infra
+spec:
+  cluster:
+    name: outegro
+  name: auth
+  owner: auth
+  connectionLimit: -1
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: notifications
+  namespace: infra
+spec:
+  cluster:
+    name: outegro
+  name: notifications
+  owner: notifications
+  connectionLimit: -1
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: payments
+  namespace: infra
+spec:
+  cluster:
+    name: outegro
+  name: payments
+  owner: payments
+  connectionLimit: -1
 ---
 # ── DB-per-service: рабочий шаблон (раскомментируй на каждый новый сервис) ──
 # 1) Секрет роли — ОБЯЗАТЕЛЬНО type basic-auth + label cnpg.io/reload (иначе

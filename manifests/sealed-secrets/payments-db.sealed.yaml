@@ -1,0 +1,17 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: payments-db
+  namespace: infra
+spec:
+  encryptedData:
+    password: AgCjIbmph0AppYnTPmSXKnrMWI/QhaxE9cFceAnk2eBe5+oAG4rHTHRijuxAOwvRyfv2OjZpgP+p/JjERzWvQC31kWDfDJ8hO/adV9VnG/ZQnTUfMteeCXLM5zWbIze5CYCrjyC68uA9F9v+kJpQV8Re8dO603WOpkS6KcfJQOsqv5/wpATj9/3l7dPswuuUpI69QEpApzP5tUqCI3E4MbuGEIjS+FQR3DHEcnoC5ZlxeBwqGfrklw1Ep0lHSuDK5+EL5Hi3Dzs0Vh7G+9LT/AXSON+JcqKqX+Qt8u8qLClh770jQ54x9c9zoowrE31VlwaVKQng8GO1XTL2p3Vu3iZQhkCVFuMvvXt8MTTglwAVoFlzoDQytmBtkGoxqmd/xw+2fIrsrdJRfiiR9bX02YQyq/JfO7C0tepTPfDmmsuqRW/u25rykqmebGpU+2j7/Tp0wVmqd2+uDHDBK1/62svZxbtUupdBMS0zcwOS4lmis6opgClW3zNFQlS419WI0E327WYvE4ETzYMUgdcPv2hmBEzuVc7vIE2Ex0UjMmARlHWh2v6iLbOQZIH0/xa223zCFZAfxxh79B25UHMEvq9i0gnY5EuJ8JW/am94rdVQqmUG83k0P8nWZJOhAHqmJkzkkr1JSff/11A2d2BoWqFBsYbTbxPrRkdwFTrI2FNB1uhmmm7cJo/BSGXRcBsMlFkCWafCn4l/mV0v0JlzCRh2KTMT76dl16Yuznba7xbNaw==
+    username: AgAId/jMhK6C+NvTkyEF1Hf5jyIrVOfjh8eieP0B3zgu6VhWoeH5Ew1tismlIr0w7TsGgbYU23G0qvomM7xLAyRqq/MZq3gkQgS3/BGU4/Ii+Hb5SVviakx1tG3SbDOJrkSr1tTLFP11UNSLJpXK/pOXsBSsfzOnCl3PbaLPim6CNgttUP6sTzfXxXtHOcfd663xNVxNH3xy73S01WoMnaetn4QEvoRw9q1L4eckiO3+9uIFq1anQ5LvUllWYAKSZnmt9ZoU82Sbxln10SxG2enSTGKGuIFWO42944c65cjbnl576TzB5e+SEqiKjA4k16wdEBoAJhNUGKYTNqHukPKiZjqOHHy2xkO2bqae1BpcogeaiwkuBWudL6+Xye7Vq/SLKgh5X81/4LF6ZGjG9MPq7/6fmOh93upuITT7O93l77w2RK76SmpwF6rqCYP9yO8Tm7JCncsgh/eCHuqaD/Q/vOgGmkjfA0mAyjq/bGVaIhLy4nI8ht7kDuW57rmDSDjmz8LwpEpcIo9Lc8AyFEF5zh1omp2RR2kJVpYmz9lPtpsRGixPIwuXnAKIBRInBy1aIKKkvG9eo7uaL6Yu8LsO8dcpWFWS0z+ac7Lmo2xsb4LBuMoawA1wnk9Y5836Po9+t2plPIxOY+3xTT8flnpoAQu44vmHOC1lFZbe884bq7M7AQuSAlqKzCslgUNeLPEj5xt4yn73cA==
+  template:
+    metadata:
+      labels:
+        cnpg.io/reload: "true"
+      name: payments-db
+      namespace: infra
+    type: kubernetes.io/basic-auth

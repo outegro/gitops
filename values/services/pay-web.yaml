@@ -1,0 +1,45 @@
+# pay-web — pay.outegro.com. Billing / subscription UI. Next 16 standalone (hello placeholder for now).
+app:
+  name: pay-web
+  image:
+    repository: ghcr.io/outegro/monorepo/pay-web
+    tag: "7f762bebb4443042fc1aeaf899dc1103c20ee3f8"
+  replicas: 2
+  port: 3000
+  # Front: probe "/" (SSR shell). No backend dep yet.
+  livenessPath: /
+  readinessPath: /
+  startupPath: /
+  resources:
+    requests:
+      cpu: 25m
+      memory: 96Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+  env:
+    - name: NODE_ENV
+      value: "production"
+  envSecretName: pay-web-env
+
+service:
+  type: clusterip+ingress
+
+ingress:
+  enabled: true
+  className: traefik
+  host: pay.outegro.com
+  tlsSecretName: outegro-wildcard-tls
+
+networkPolicy:
+  enabled: true
+  allowExternalHttps: false
+  # Traefik (kube-system) → pod:3000.
+  extraIngress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - port: 3000
+          protocol: TCP

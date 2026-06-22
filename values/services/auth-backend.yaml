@@ -1,0 +1,34 @@
+# auth-backend — identity, sessions, JWT/JWKS, entitlements. ClusterIP only (BFF/siblings reach it in-cluster).
+app:
+  name: auth-backend
+  image:
+    repository: ghcr.io/outegro/monorepo/auth-backend
+    tag: "7f762bebb4443042fc1aeaf899dc1103c20ee3f8"
+  replicas: 2
+  port: 3000
+  livenessPath: /health
+  readinessPath: /health/deep
+  startupPath: /health
+  resources:
+    requests:
+      cpu: 25m
+      memory: 96Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+  # DATABASE_URL / DATABASE_URL_DIRECT from this sealed secret (envFrom).
+  envSecretName: auth-backend-env
+  env:
+    - name: NODE_ENV
+      value: "production"
+
+service:
+  type: clusterip
+
+networkPolicy:
+  enabled: true
+  allowExternalHttps: false
+
+# No migrations yet (schema has no models). Flip to true with the first migration.
+migration:
+  enabled: false

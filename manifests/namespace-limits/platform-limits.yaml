@@ -11,12 +11,15 @@ metadata:
   name: platform-quota
   namespace: platform
 spec:
+  # Raised for the 6-service era (auth/notifications/payments + id/pay + landing,
+  # 2 replicas each) and the pending 16Gi/7-CPU node upgrade. Still a guardrail —
+  # the sum of all platform pod limits can't starve infra on the shared node.
   hard:
-    requests.cpu: "2"
-    requests.memory: 2Gi
-    limits.cpu: "4"
-    limits.memory: 3Gi
-    pods: "20"
+    requests.cpu: "3"
+    requests.memory: 3Gi
+    limits.cpu: "6"
+    limits.memory: 5Gi
+    pods: "30"
 ---
 apiVersion: v1
 kind: LimitRange
