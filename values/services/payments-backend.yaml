@@ -3,7 +3,7 @@ app:
   name: payments-backend
   image:
     repository: ghcr.io/outegro/monorepo/payments-backend
-    tag: "7f762bebb4443042fc1aeaf899dc1103c20ee3f8"
+    tag: "a129b7c062dd5eb1a1f29c08a289c39cc67e8d49"
   replicas: 2
   port: 3000
   livenessPath: /health
@@ -21,14 +21,11 @@ app:
   env:
     - name: NODE_ENV
       value: "production"
-
 service:
   type: clusterip
-
 networkPolicy:
   enabled: true
   allowExternalHttps: false
-
 # No migrations yet (schema has no models). Flip to true with the first migration.
 migration:
   enabled: false
