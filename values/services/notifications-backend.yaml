@@ -16,7 +16,8 @@ app:
     limits:
       cpu: 250m
       memory: 256Mi
-  # DATABASE_URL / DATABASE_URL_DIRECT from this sealed secret (envFrom).
+  # All env from this sealed secret (envFrom): DATABASE_URL, DATABASE_URL_DIRECT,
+  # RABBITMQ_URL, RESEND_API_KEY, RESEND_FROM, INTERNAL_API_KEY (+ TELEGRAM_* later).
   envSecretName: notifications-backend-env
   env:
     - name: NODE_ENV
@@ -27,8 +28,11 @@ service:
 
 networkPolicy:
   enabled: true
-  allowExternalHttps: false
+  # Outbound HTTPS required: Resend (api.resend.com) + Telegram (api.telegram.org).
+  allowExternalHttps: true
 
-# No migrations yet (schema has no models). Flip to true with the first migration.
+# First migration (delivery_log / preferences / telegram_links) runs as an Argo
+# PreSync Job from the service image, against DATABASE_URL_DIRECT.
 migration:
-  enabled: false
+  enabled: true
+  databaseUrlKey: DATABASE_URL_DIRECT
