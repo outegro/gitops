@@ -3,7 +3,7 @@ app:
   name: id-web
   image:
     repository: ghcr.io/outegro/monorepo/id-web
-    tag: "a129b7c062dd5eb1a1f29c08a289c39cc67e8d49"
+    tag: "b5f11538741753941f69bd9277761b15ca418a2d"
   replicas: 2
   port: 3000
   # Front: probe "/" (SSR shell). No backend dep yet.
