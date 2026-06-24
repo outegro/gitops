@@ -3,7 +3,7 @@ app:
   name: auth-backend
   image:
     repository: ghcr.io/outegro/monorepo/auth-backend
-    tag: "ebf327e137128987a1f5cffb23cbadb3da062eda"
+    tag: "f2196f5ab35516981f91a4670d2f5da491de532c"
   replicas: 2
   port: 3000
   livenessPath: /health
