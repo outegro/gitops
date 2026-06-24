@@ -3,7 +3,7 @@ app:
   name: id-web
   image:
     repository: ghcr.io/outegro/monorepo/id-web
-    tag: "50aae84da61ef0c140d2456a929f57d4a9e0be97"
+    tag: "1424b6e3dcead1e1a1e4d98e0ba133eaa7dceaf4"
   replicas: 2
   port: 3000
   # Front: probe "/" (SSR shell, always 200 while Next is up). Do NOT probe BFF routes —

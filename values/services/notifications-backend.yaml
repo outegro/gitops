@@ -3,7 +3,7 @@ app:
   name: notifications-backend
   image:
     repository: ghcr.io/outegro/monorepo/notifications-backend
-    tag: "541900de8b7ae79e97edb486dd5ce5747e0c9a3f"
+    tag: "1424b6e3dcead1e1a1e4d98e0ba133eaa7dceaf4"
   replicas: 2
   port: 3000
   livenessPath: /health
