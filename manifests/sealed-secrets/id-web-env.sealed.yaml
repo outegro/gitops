@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: id-web-env
+  namespace: platform
+spec:
+  encryptedData:
+    INTERNAL_API_KEY: AgAIGEVGYRRJwZjcyQN5E1GO39bgeFp9T8Gvo4HxK1pYBJuWDFH81mqZmcNcX/Zso4Hy0bVerJtSvEoGc/S8IrddAFKpIJTxrbyGGDng3gPAdfd7vyN2dWcvMogTKl+MZq3rUw16O5nS5UNPy6aEOqS2DjxN4Dd0x+6UJ9yQhUV1+RTaaCUDnEUvuX8EYfLHtGUIg2/mV9RTum+uDtdmEbONEjjAcUIZ/5lKmlddVgZMYtycU4fe/GrFC0ieLw6MJRVys21RlXd+id5CvHwM5rRxwWRoMP+5wcGdSGmKJAsOTsXRTiBRcB26jKQQ2Xe3TTJL4khsOdEwlTPCj8doI+XkL1k5iOFkHhX8uqQRhK4tbzAPGpsXexDrKTN9I3uo3F3KCMlHcjbuAWoRwSK0JGOyGyRQCdSLsSHa/1EF32KBBEDTi9Byg2fjuQ8bq2i0/CZ634xDkNUQTL7a1+OF5Vy0kX1Ys+8ZCMvMpzgAZmDQY5hdDaNn7EoKT1OBHPAEnwWtegXYBEfVxOmpG/gOqbMR0tWoL2+vRr0Vmoq8iETCShsgxTa06gGsIPa3dvoMQvQXVdKtvDF+exXPydpEZIY7NiX3zme/iEmY6YQ0XUmk9liwCdbtK5MOSErMWTAQXluXnPEqVlUE67gKRHQgOfUC0MItllLlaemjOO4R+a2XEmbFTM6UZegs9RM1EllMVVFqCqZf3WdwT2bxL7dX1oP2wXDXBerbaqa/jBlchoaKGg97hJFDbqVgO3t1bUeTC/je5n6+10vLVXJru0pMzX/3
+  template:
+    metadata:
+      name: id-web-env
+      namespace: platform
