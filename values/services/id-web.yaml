@@ -1,12 +1,13 @@
-# id-web — id.outegro.com. Sign-in / account UI. Next 16 standalone (hello placeholder for now).
+# id-web — id.outegro.com. Sign-in / account UI + BFF over auth-backend (ClusterIP-only).
 app:
   name: id-web
   image:
     repository: ghcr.io/outegro/monorepo/id-web
-    tag: "a129b7c062dd5eb1a1f29c08a289c39cc67e8d49"
+    tag: "0fd7c6dada672898197d7061acc9727a8ac8c4fd"
   replicas: 2
   port: 3000
-  # Front: probe "/" (SSR shell). No backend dep yet.
+  # Front: probe "/" (SSR shell, always 200 while Next is up). Do NOT probe BFF routes —
+  # they proxy auth-backend and a backend blip must not pull id-web from the LB.
   livenessPath: /
   readinessPath: /
   startupPath: /
@@ -17,9 +18,18 @@ app:
     limits:
       cpu: 250m
       memory: 256Mi
+  # BFF config (all non-secret). auth-backend is ClusterIP :80 in the same namespace.
   env:
     - name: NODE_ENV
       value: "production"
+    - name: AUTH_API_BASE
+      value: "http://auth-backend:80"
+    - name: PUBLIC_ORIGIN
+      value: "https://id.outegro.com"
+    - name: COOKIE_DOMAIN
+      value: ".outegro.com"
+    - name: REFRESH_COOKIE
+      value: "outegro_refresh"
   envSecretName: id-web-env
 service:
   type: clusterip+ingress
