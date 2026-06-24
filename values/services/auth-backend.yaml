@@ -3,7 +3,7 @@ app:
   name: auth-backend
   image:
     repository: ghcr.io/outegro/monorepo/auth-backend
-    tag: "b5f11538741753941f69bd9277761b15ca418a2d"
+    tag: "ebf327e137128987a1f5cffb23cbadb3da062eda"
   replicas: 2
   port: 3000
   livenessPath: /health
@@ -21,14 +21,11 @@ app:
   env:
     - name: NODE_ENV
       value: "production"
-
 service:
   type: clusterip
-
 networkPolicy:
   enabled: true
   allowExternalHttps: false
-
 # First migration (users/identities/login_codes/sessions/entitlements/
 # webauthn_credentials/outbox) runs as an Argo PreSync Job against DATABASE_URL_DIRECT.
 migration:
