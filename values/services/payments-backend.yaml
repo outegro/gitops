@@ -3,7 +3,7 @@ app:
   name: payments-backend
   image:
     repository: ghcr.io/outegro/monorepo/payments-backend
-    tag: "1424b6e3dcead1e1a1e4d98e0ba133eaa7dceaf4"
+    tag: "c6cdd4299ab7230c872deffa66e8074f14bcd1ea"
   replicas: 2
   port: 3000
   livenessPath: /health

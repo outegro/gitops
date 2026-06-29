@@ -3,7 +3,7 @@ app:
   name: landing-web
   image:
     repository: ghcr.io/outegro/monorepo/landing-web
-    tag: "1424b6e3dcead1e1a1e4d98e0ba133eaa7dceaf4"
+    tag: "c6cdd4299ab7230c872deffa66e8074f14bcd1ea"
   replicas: 2
   port: 3000
   # Probes hit "/" (SSR shell, always 200 while the Next server is up). We deliberately

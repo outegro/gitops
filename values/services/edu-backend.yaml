@@ -3,7 +3,7 @@ app:
   name: edu-backend
   image:
     repository: ghcr.io/outegro/monorepo/edu-backend
-    tag: "ac6f3559e2f7bbbbd0977b0e37cbd4212fbc1651"
+    tag: "c6cdd4299ab7230c872deffa66e8074f14bcd1ea"
   replicas: 2
   port: 3000
   livenessPath: /health
