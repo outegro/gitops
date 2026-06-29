@@ -3,7 +3,7 @@ app:
   name: edu-web
   image:
     repository: ghcr.io/outegro/monorepo/edu-web
-    tag: "c6cdd4299ab7230c872deffa66e8074f14bcd1ea"
+    tag: "2a2f91a1437554b576277aa9a79342a6645597ec"
   replicas: 2
   port: 3000
   # Front: probe "/" (SSR shell, always 200 while Next is up). Do NOT probe BFF routes —
