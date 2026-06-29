@@ -21,6 +21,10 @@ app:
   env:
     - name: NODE_ENV
       value: "production"
+    # MiniMax M3 is a reasoning model (<think>); llm.service strips the think block.
+    # Base URL + max_tokens(4096) come from env.validation defaults (api.minimax.io/v1).
+    - name: LLM_MODEL
+      value: "MiniMax-M3"
 service:
   type: clusterip
 networkPolicy:
