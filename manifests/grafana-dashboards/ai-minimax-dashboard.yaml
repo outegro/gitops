@@ -1,0 +1,122 @@
+# Grafana dashboard for LLM (MiniMax) usage. The kube-prometheus-stack grafana sidecar
+# (searchNamespace: observability, label grafana_dashboard) auto-loads any ConfigMap with
+# this label. Metrics come from edu-backend /metrics (minimax_* series).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-ai-minimax
+  namespace: observability
+  labels:
+    grafana_dashboard: "1"
+data:
+  ai-minimax.json: |
+    {
+      "title": "Outegro — AI (MiniMax)",
+      "uid": "outegro-ai-minimax",
+      "schemaVersion": 39,
+      "version": 1,
+      "editable": true,
+      "time": { "from": "now-6h", "to": "now" },
+      "refresh": "30s",
+      "tags": ["outegro", "ai", "llm"],
+      "templating": {
+        "list": [
+          {
+            "name": "datasource",
+            "type": "datasource",
+            "query": "prometheus",
+            "current": {},
+            "hide": 0
+          }
+        ]
+      },
+      "panels": [
+        {
+          "type": "stat",
+          "title": "Calls (24h)",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+          "targets": [
+            { "expr": "sum(increase(minimax_requests_total[24h]))", "refId": "A" }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "Error ratio (30m)",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "fieldConfig": { "defaults": { "unit": "percentunit", "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 0.02 }, { "color": "red", "value": 0.1 } ] } } },
+          "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+          "targets": [
+            { "expr": "sum(rate(minimax_requests_total{outcome!=\"success\"}[30m])) / clamp_min(sum(rate(minimax_requests_total[30m])), 0.0001)", "refId": "A" }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "Tokens (24h)",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+          "targets": [
+            { "expr": "sum(increase(minimax_tokens_total[24h]))", "refId": "A" }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "p95 latency (5m)",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "fieldConfig": { "defaults": { "unit": "s" } },
+          "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+          "targets": [
+            { "expr": "histogram_quantile(0.95, sum by (le) (rate(minimax_request_duration_seconds_bucket[5m])))", "refId": "A" }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Request rate by operation",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+          "targets": [
+            { "expr": "sum by (operation) (rate(minimax_requests_total[5m]))", "legendFormat": "{{operation}}", "refId": "A" }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Request rate by outcome",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+          "targets": [
+            { "expr": "sum by (outcome) (rate(minimax_requests_total[5m]))", "legendFormat": "{{outcome}}", "refId": "A" }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Latency p50/p95/p99 (s)",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "fieldConfig": { "defaults": { "unit": "s" } },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+          "targets": [
+            { "expr": "histogram_quantile(0.50, sum by (le) (rate(minimax_request_duration_seconds_bucket[5m])))", "legendFormat": "p50", "refId": "A" },
+            { "expr": "histogram_quantile(0.95, sum by (le) (rate(minimax_request_duration_seconds_bucket[5m])))", "legendFormat": "p95", "refId": "B" },
+            { "expr": "histogram_quantile(0.99, sum by (le) (rate(minimax_request_duration_seconds_bucket[5m])))", "legendFormat": "p99", "refId": "C" }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Token usage by kind (tokens/s)",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+          "targets": [
+            { "expr": "sum by (kind) (rate(minimax_tokens_total[5m]))", "legendFormat": "{{kind}}", "refId": "A" }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "p95 latency by operation (s)",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "fieldConfig": { "defaults": { "unit": "s" } },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 20 },
+          "targets": [
+            { "expr": "histogram_quantile(0.95, sum by (le, operation) (rate(minimax_request_duration_seconds_bucket[5m])))", "legendFormat": "{{operation}}", "refId": "A" }
+          ]
+        }
+      ]
+    }

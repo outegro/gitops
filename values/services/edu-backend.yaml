@@ -3,7 +3,7 @@ app:
   name: edu-backend
   image:
     repository: ghcr.io/outegro/monorepo/edu-backend
-    tag: "ac6f3559e2f7bbbbd0977b0e37cbd4212fbc1651"
+    tag: "c6cdd4299ab7230c872deffa66e8074f14bcd1ea"
   replicas: 2
   port: 3000
   livenessPath: /health
@@ -27,12 +27,25 @@ app:
       value: "MiniMax-M3"
 service:
   type: clusterip
+# Prometheus scrapes GET /metrics → "Outegro — AI (MiniMax)" Grafana dashboard.
+serviceMonitor:
+  enabled: true
+  path: /metrics
+  interval: 30s
 networkPolicy:
   enabled: true
-  # edu-backend verifies JWTs via auth-backend JWKS over the internet? No — JWKS is in-cluster
-  # (JWKS_URL defaults to http://auth-backend:80). No external HTTPS needed for that, but the
   # LLM provider (api.minimax.io) is reached over the internet → allow egress HTTPS.
+  # (JWKS is in-cluster: JWKS_URL defaults to http://auth-backend:80.)
   allowExternalHttps: true
+  # Let Prometheus (observability ns) scrape :3000/metrics.
+  extraIngress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - port: 3000
+          protocol: TCP
 # First migration (Course/Chapter/Enrollment/HomeworkSubmission/VocabEntry/OutboxEvent + Korean seed)
 # runs as an Argo PreSync Job against DATABASE_URL_DIRECT.
 migration:
