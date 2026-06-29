@@ -154,6 +154,66 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: edu-backend
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  project: outegro
+  sources:
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      path: charts/outegro-service
+      helm:
+        releaseName: edu-backend
+        valueFiles:
+          - $values/values/services/edu-backend.yaml
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: edu-web
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  project: outegro
+  sources:
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      path: charts/outegro-service
+      helm:
+        releaseName: edu-web
+        valueFiles:
+          - $values/values/services/edu-web.yaml
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: pay-web
   namespace: argocd
   annotations:

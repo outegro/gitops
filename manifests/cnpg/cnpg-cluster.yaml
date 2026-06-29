@@ -70,6 +70,12 @@ spec:
         connectionLimit: 20
         passwordSecret:
           name: payments-db
+      - name: edu
+        ensure: present
+        login: true
+        connectionLimit: 20
+        passwordSecret:
+          name: edu-db
 ---
 # DB-per-service databases (owner = соответствующая login-роль, НЕ общий `app`).
 apiVersion: postgresql.cnpg.io/v1
@@ -106,6 +112,18 @@ spec:
     name: outegro
   name: payments
   owner: payments
+  connectionLimit: -1
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: edu
+  namespace: infra
+spec:
+  cluster:
+    name: outegro
+  name: edu
+  owner: edu
   connectionLimit: -1
 ---
 # ── DB-per-service: рабочий шаблон (раскомментируй на каждый новый сервис) ──
