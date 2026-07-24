@@ -76,6 +76,18 @@ spec:
         connectionLimit: 20
         passwordSecret:
           name: edu-db
+      - name: budget
+        ensure: present
+        login: true
+        connectionLimit: 20
+        passwordSecret:
+          name: budget-db
+      - name: itmaxxing
+        ensure: present
+        login: true
+        connectionLimit: 20
+        passwordSecret:
+          name: itmaxxing-db
 ---
 # DB-per-service databases (owner = соответствующая login-роль, НЕ общий `app`).
 apiVersion: postgresql.cnpg.io/v1
@@ -124,6 +136,30 @@ spec:
     name: outegro
   name: edu
   owner: edu
+  connectionLimit: -1
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: budget
+  namespace: infra
+spec:
+  cluster:
+    name: outegro
+  name: budget
+  owner: budget
+  connectionLimit: -1
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: itmaxxing
+  namespace: infra
+spec:
+  cluster:
+    name: outegro
+  name: itmaxxing
+  owner: itmaxxing
   connectionLimit: -1
 ---
 # ── DB-per-service: рабочий шаблон (раскомментируй на каждый новый сервис) ──

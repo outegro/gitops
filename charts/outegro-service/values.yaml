@@ -42,6 +42,10 @@ ingress:
   host: ""              # e.g. auth.outegro.com
   tlsSecretName: outegro-wildcard-tls  # wildcard cert from cert-manager
   annotations: {}
+  # Route specific prefixes on this host to ANOTHER service (before the `/` catch-all).
+  # Used by budget-web to send `/socket.io` to budget-backend's WS gateway. Each entry:
+  #   - { path: /socket.io, pathType: Prefix, serviceName: budget-backend, servicePort: 80 }
+  extraPaths: []
 
 # service account
 serviceAccount:

@@ -1,0 +1,50 @@
+# budget-backend — cascading monthly budget (months, FX, cumulative caps) + WebSocket live
+# sync + RabbitMQ (fanout live bus + notify threshold alerts). ClusterIP; budget-web BFF reaches
+# it in-cluster, and Traefik routes budget.outegro.com/socket.io → here (WS gateway, cookie-auth).
+app:
+  name: budget-backend
+  image:
+    repository: ghcr.io/outegro/monorepo/budget-backend
+    tag: "main" # bumped by CI to the built SHA
+  replicas: 2
+  port: 3000
+  livenessPath: /health
+  readinessPath: /health/deep
+  startupPath: /health
+  resources:
+    requests:
+      cpu: 25m
+      memory: 96Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+  # DATABASE_URL / DATABASE_URL_DIRECT / RABBITMQ_URL from this sealed secret (envFrom).
+  envSecretName: budget-backend-env
+  env:
+    - name: NODE_ENV
+      value: "production"
+    # Same-origin in prod: browser → budget.outegro.com/socket.io (Traefik → here), so the
+    # httpOnly og_access cookie rides the handshake. cors origin is reflected + credentialed.
+    - name: WS_CORS_ORIGIN
+      value: "https://budget.outegro.com"
+service:
+  type: clusterip
+networkPolicy:
+  enabled: true
+  # FX provider (open.er-api.com) is reached over the internet → allow egress HTTPS.
+  # (JWKS is in-cluster: JWKS_URL defaults to http://auth-backend:80.)
+  allowExternalHttps: true
+  # Traefik (kube-system) must reach :3000 for the /socket.io WS path routed to this backend.
+  extraIngress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - port: 3000
+          protocol: TCP
+# First migration (Setting/BaseExpense/BaseIncome/Month/Expense/Income/MonthCumulativeSpend)
+# runs as an Argo PreSync Job against DATABASE_URL_DIRECT.
+migration:
+  enabled: true
+  databaseUrlKey: DATABASE_URL_DIRECT

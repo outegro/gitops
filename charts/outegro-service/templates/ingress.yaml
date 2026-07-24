@@ -18,6 +18,22 @@ spec:
     - host: {{ .Values.ingress.host }}
       http:
         paths:
+          {{- /*
+            extraPaths route specific prefixes on THIS host to a DIFFERENT service —
+            e.g. budget-web's `/socket.io` → budget-backend (the WS gateway). Listed
+            BEFORE `/` so the more-specific prefix wins. The browser stays same-origin,
+            so the httpOnly og_access cookie rides the WS handshake and the gateway
+            auth-gates it. Empty for every other service.
+          */}}
+          {{- range .Values.ingress.extraPaths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ .serviceName }}
+                port:
+                  number: {{ .servicePort | default 80 }}
+          {{- end }}
           - path: /
             pathType: Prefix
             backend:

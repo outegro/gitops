@@ -240,3 +240,123 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: budget-backend
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  project: outegro
+  sources:
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      path: charts/outegro-service
+      helm:
+        releaseName: budget-backend
+        valueFiles:
+          - $values/values/services/budget-backend.yaml
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: budget-web
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  project: outegro
+  sources:
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      path: charts/outegro-service
+      helm:
+        releaseName: budget-web
+        valueFiles:
+          - $values/values/services/budget-web.yaml
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: itmaxxing-backend
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  project: outegro
+  sources:
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      path: charts/outegro-service
+      helm:
+        releaseName: itmaxxing-backend
+        valueFiles:
+          - $values/values/services/itmaxxing-backend.yaml
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: itmaxxing-web
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  project: outegro
+  sources:
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      path: charts/outegro-service
+      helm:
+        releaseName: itmaxxing-web
+        valueFiles:
+          - $values/values/services/itmaxxing-web.yaml
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
