@@ -38,6 +38,14 @@ networkPolicy:
   # MiniMax LLM API is reached over the internet → allow egress HTTPS.
   # (JWKS is in-cluster: JWKS_URL defaults to http://auth-backend:80.)
   allowExternalHttps: true
+# LLM cost/latency metrics (minimax_* series), moved here from edu-backend when edu was
+# removed. Feeds the "Outegro — AI (MiniMax)" Grafana dashboard, which filters only on the
+# series names, so it works unchanged. Matters more here than it did for edu: M2 is a
+# reasoning model and its billed reasoning_tokens dominate the cost of /intake and /structure.
+serviceMonitor:
+  enabled: true
+  path: /metrics
+  interval: 30s
 # First migration (Profile / LoreEntry / Generation) runs as an Argo PreSync Job against
 # DATABASE_URL_DIRECT.
 migration:

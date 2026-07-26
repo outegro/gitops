@@ -1,6 +1,8 @@
 # Grafana dashboard for LLM (MiniMax) usage. The kube-prometheus-stack grafana sidecar
 # (searchNamespace: observability, label grafana_dashboard) auto-loads any ConfigMap with
-# this label. Metrics come from edu-backend /metrics (minimax_* series).
+# this label. Metrics come from itmaxxing-backend /metrics (minimax_* series) — they came
+# from edu-backend until edu was removed. No panel filters by job/service, only by the
+# minimax_* series names, so the dashboard followed the metrics across that move unchanged.
 apiVersion: v1
 kind: ConfigMap
 metadata:

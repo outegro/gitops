@@ -4,7 +4,10 @@ app:
   image:
     repository: ghcr.io/outegro/monorepo/pay-web
     tag: "aa76260bb8d9cad63ce6b622649338d15df70040"
-  replicas: 2
+  # 1 while this is still the static "coming soon" page — 2 replicas of a placeholder were
+  # holding 512Mi of a quota that budget/itmaxxing actually needed. Back to 2 as soon as the
+  # Lava.top payments work starts and this becomes a real checkout surface.
+  replicas: 1
   port: 3000
   # Front: probe "/" (SSR shell). No backend dep yet.
   livenessPath: /
