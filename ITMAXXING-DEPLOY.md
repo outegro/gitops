@@ -54,15 +54,16 @@ rm /tmp/itmaxxing-db.yaml
 
 ### 1b. `itmaxxing-backend-env` — connection URL + LLM key (namespace `platform`)
 - Postgres host = CNPG rw service `outegro-rw.infra.svc:5432`, db `itmaxxing`, user `itmaxxing`.
-- `LLM_API_KEY` = the **same MiniMax key already used by edu-backend** — fetch it rather than
-  re-typing:
+- `LLM_API_KEY` = the MiniMax key. It used to live in `edu-backend-env` and was copied out of
+  there when this secret was first sealed; edu has since been removed, so `itmaxxing-backend-env`
+  is now the only copy in the cluster. To read the current value back:
 ```bash
-kubectl -n platform get secret edu-backend-env -o jsonpath='{.data.LLM_API_KEY}' | base64 -d
+kubectl -n platform get secret itmaxxing-backend-env -o jsonpath='{.data.LLM_API_KEY}' | base64 -d
 ```
 ```bash
 ITMAXXING_PW_ENC="$(python3 -c 'import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=""))' "$ITMAXXING_PW")"
 DB_URL="postgresql://itmaxxing:${ITMAXXING_PW_ENC}@outegro-rw.infra.svc:5432/itmaxxing"
-LLM_KEY="$(kubectl -n platform get secret edu-backend-env -o jsonpath='{.data.LLM_API_KEY}' | base64 -d)"
+LLM_KEY="<the MiniMax API key>"   # was sourced from edu-backend-env before edu was removed
 
 cat > /tmp/itmaxxing-backend-env.yaml <<EOF
 apiVersion: v1

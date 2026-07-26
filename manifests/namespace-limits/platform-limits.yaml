@@ -1,6 +1,6 @@
 # Single-box guardrail: cap what the `platform` namespace (self-written apps) can
 # consume, so a runaway/leaking app pod can't starve the infra (Postgres/Redis/
-# RabbitMQ/observability) that shares the same node. Node = 5 CPU / ~7.9Gi.
+# RabbitMQ/observability) that shares the same node. Node = 7 CPU / ~15.9Gi allocatable.
 #
 # ResourceQuota + LimitRange go together: once a quota sets limits.cpu/memory, EVERY
 # pod MUST declare limits or it's rejected. The LimitRange supplies defaults so pods
@@ -11,14 +11,27 @@ metadata:
   name: platform-quota
   namespace: platform
 spec:
-  # Raised for the 6-service era (auth/notifications/payments + id/pay + landing,
-  # 2 replicas each) and the pending 16Gi/7-CPU node upgrade. Still a guardrail —
-  # the sum of all platform pod limits can't starve infra on the shared node.
+  # Raised again for the budget + itmaxxing era. The previous 5Gi was reached EXACTLY
+  # (5120Mi/5120Mi) and silently became the real blocker: every new pod, including the
+  # PreSync migration Jobs, was rejected with "exceeded quota", while Argo only surfaced
+  # a vague "Job was active longer than specified deadline".
+  #
+  # Arithmetic behind 7Gi (limits, i.e. ceilings — NOT reservations):
+  #   after removing edu (-1024Mi) and halving the payments/pay stubs (-512Mi) → 3584Mi
+  #   + budget-backend 512 + itmaxxing-backend 640 + itmaxxing-web 2nd replica 256 → 4992Mi
+  #   + both PreSync migration Jobs running at once (256 + 320)                  → 5568Mi peak
+  # 5568Mi does NOT fit in 5Gi — that peak is precisely what has to stop biting us.
+  # 7Gi leaves the steady state at ~70% and the rollout peak at ~78%, with room for one
+  # more service. The node carries this fine: 15.9Gi allocatable against ~7.4Gi actually
+  # in use, and limits are ceilings that only bind under simultaneous worst-case load.
+  #
+  # requests are deliberately left at 3Gi/3 CPU: those ARE reservations and the real
+  # post-rollout figure is ~1.9Gi, so the scheduler keeps its honest headroom.
   hard:
     requests.cpu: "3"
     requests.memory: 3Gi
-    limits.cpu: "6"
-    limits.memory: 5Gi
+    limits.cpu: "6500m"
+    limits.memory: 7Gi
     pods: "30"
 ---
 apiVersion: v1

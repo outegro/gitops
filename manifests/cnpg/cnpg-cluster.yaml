@@ -70,12 +70,10 @@ spec:
         connectionLimit: 20
         passwordSecret:
           name: payments-db
-      - name: edu
-        ensure: present
-        login: true
-        connectionLimit: 20
-        passwordSecret:
-          name: edu-db
+      # NB: the `edu` role and Database are gone (service removed). `ensure: absent` was
+      # deliberately NOT used — dropping a role that owns objects fails, and the physical
+      # database survives anyway because Database CRs default to
+      # databaseReclaimPolicy: retain. Both are dropped once, by hand, after this lands.
       - name: budget
         ensure: present
         login: true
@@ -127,17 +125,6 @@ spec:
   connectionLimit: -1
 ---
 apiVersion: postgresql.cnpg.io/v1
-kind: Database
-metadata:
-  name: edu
-  namespace: infra
-spec:
-  cluster:
-    name: outegro
-  name: edu
-  owner: edu
-  connectionLimit: -1
----
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
 metadata:

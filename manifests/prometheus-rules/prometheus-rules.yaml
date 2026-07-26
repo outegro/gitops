@@ -73,6 +73,37 @@ spec:
             summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is restarting"
             description: "Контейнер {{ $labels.container }} часто рестартится."
 
+        # PodCrashLooping counts RESTARTS, so it is structurally blind to a container that
+        # never starts at all. During the budget/itmaxxing rollout two pods sat in
+        # ImagePullBackOff for 40 minutes (bad image tag) and nothing fired.
+        - alert: PodImagePullFailing
+          expr: |
+            kube_pod_container_status_waiting_reason{reason=~"ImagePullBackOff|ErrImagePull"} == 1
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} cannot pull its image"
+            description: >-
+              Контейнер {{ $labels.container }} не может скачать образ ({{ $labels.reason }}).
+              Обычно это несуществующий тег в values или отсутствующий pull-секрет.
+
+        # A full ResourceQuota rejects every new pod, including Argo PreSync migration Jobs,
+        # and Argo only reports a vague "Job was active longer than specified deadline".
+        # This is what silently blocked the budget/itmaxxing deploy at exactly 5Gi/5Gi.
+        - alert: ResourceQuotaNearLimit
+          expr: |
+            kube_resourcequota{type="used"}
+              / ignoring(type) kube_resourcequota{type="hard"} > 0.85
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Quota {{ $labels.namespace }}/{{ $labels.resourcequota }} is above 85% on {{ $labels.resource }}"
+            description: >-
+              Использовано {{ $value | humanizePercentage }} лимита {{ $labels.resource }}.
+              На 100% новые поды перестанут создаваться (exceeded quota).
+
     - name: outegro-node
       interval: 30s
       rules:

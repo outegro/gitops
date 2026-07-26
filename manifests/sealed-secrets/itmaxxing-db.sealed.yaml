@@ -1,0 +1,17 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: itmaxxing-db
+  namespace: infra
+spec:
+  encryptedData:
+    password: AgBiOEZSVe83se3NCIXJ0g4F0pNnotrkrToHaiHG6NPDBILnOiXCrWlUl+hVdpP8Mdow1A9lONAQGtW2Sw7yOm3msqFNygs4j/CMbA9PkypWVjuCaVbK2FMyuuzR7/2bvw2oJc0k+LKzRGYM+ESmVzO6crk66HUQaaYwzrSUlS8WmK9+CB4TE8baQBHyn1iVybBE+a7yOiMH+8LqYVbRFRZTN9mXY2DwtjVqNg4apvwOP1yvcnYpf3RbCjT9OxF/Q+S4WSC51XR0tL0k7UIBcjnCXeWvfeMzSiIo0cf0N30w10J1aoPVQokx4gbONQD75uA6Cf2bc6u5ywOSE9V7yii49Zc9cXPW2Jw+fl1uwVTI43hfJwnJMljUGx3lRlLGGbNBNy403tpy4/yTTYykilT2+ms88G4jGYjzfy/1rVYE2IlFMzxO0R0diWIRN/DbC/M+dnSH4bSfa3USUS0kL0i95QIQ9+T666YgBdKNgj9KDbPlI/RP3gnaHmfZElkKh+3rIAM+w14f9UlETYsEnt7Ezikau8QUS2mkuD51mz/qn8euGoH7n9rfGuJruxXbpWgNfbp7wf82s7d53e1e3l7DdCPkkHL+rWIJE16V3jsUFPQVI4zq389f84QmnD/xjhxwINXN3Ef37jC0TCrmpFMzyhFNZL3lYX72j/bP5Z8rvYk3f2edZyVMIZEo4/fsTkN+jL4pCX1gzilqZOEuqbykb/aX14y0bwJik8/d9tEAHw==
+    username: AgBWtjcVtsxuAVlJJ2g+OQsw4eHg5TmpJxZyAK1cDexn8EQ8PF5VhQUxUmkB4bKbuaaRSjYt2Jzn1y8l3cwHpHvNW1bigPhWFPuqyA6rZdf4Yao0EBy/Nzx+BYEDOazzGMKSsmuP0DecsJFrBhH5GeZOt6XdeYD+dEnaMfe43SexsCts9tFtb0AfBxJR2qDVtfCOeayNSJz1ZwfQ9eZiqe0nhnSghaJQDLnpED2r+LEtIoOK8x4uDao/ko0Y5w832ATIWfVlSpXnbnzOCooi/vOAS8mIt5nk1chmDpQfmdHuvgcPtHvRWpLQPXWy7GEYLpGlFg5SUykppRgV21uIFwvGDU+tVACYGuVGDKpZdzOdqoKldidayKmaaGwxEFilLbIaB/FDXFV+FZbwGbPkcZLkmeY9h1LgiEtuLpYnLbRQPtPCq2TG1jSXG8N8kBnDv7osiREJXkN8H2W01fBqrEZY1ZPXhKLGOP+64VkfJRVf80WlKBqrP5VdM5LytHyhB1imNwVG7tS9B3mea78t9g3+PzdArgM9Blbdkv1/fwVtnIzGl8BNl4y9ByIvUHCFPVepjmAHtIl/qo13Cal7Tu3wUpZuWYH//qkYGVDyiTMZUBHyBVW2KB16YwXLgnlqA76v3ASgISoYiTeKlCB23r4u/uh8MvkXRZJY80baUUb1MQhOZGVEJcM2QKq+l8UkYsdVVZ1MsvLzOgs=
+  template:
+    metadata:
+      labels:
+        cnpg.io/reload: "true"
+      name: itmaxxing-db
+      namespace: infra
+    type: kubernetes.io/basic-auth

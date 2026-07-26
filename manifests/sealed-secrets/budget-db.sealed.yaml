@@ -1,0 +1,17 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: budget-db
+  namespace: infra
+spec:
+  encryptedData:
+    password: AgBXEEbuHukk/F1EFFgU/TiD+2qcT3/3ZoF3qI8RQqvqhTFUNJEiKWTGy++a8ACed7hTPV7Ngk8CuFECdzHxx3vZghNi7adTHjEprN/JYiqd7BC9Zhf2JgBkaclFnXEMGf3eCWDdU4nroExG1iGxms5g4BKXb1KmCANMKW6Vhxi+5tcP7/0KTFz9A49rrD81bsdXILFD1ZbGKzVU76CgMy8n5bth9uBKGgrKz/G+WWBeObxJKPE1bzmPBoSP1I47JE0Q/Z/qpR6M7Locny71fzxT7x/Wu0c5L3lEQCV0sWiHzUPcNySD03IAfnEEj8PTOIahXMPfFgjip+X5zNhnCADuL2SfkLcPBT5Ly+XLXr4no5sdybdi5qxx1TuAmaTZk9vMzFHTUtwnZtVBoQFmBx+9eT3vN77rmZAJvUSBnXZZw/s2Esu3dzdxqeDFIUxZY4KhldCczjPpCxSnqAAzN0VM67tFIXXfrJxWVxk2pQu6PPIJeHUJUw2UpQbmwVAMuBnrffnqOHI9dYUVhOwKP1JCWgxa7RURQLc/7UAeQBPlpKBgRbCFe7tucZedZDryGBcVr8lgX30xt0sc+Q2cAUMFQmw7TIvVjXchExY0XP2lMXh9g1zlkhthhwVNZULMBT9sEjZwfsehgTbWhckNmJBCoe5grlQUt8MshlocE6xBuFUw8TV+6BJGcnfTswTvs9Swy4GcdYcdpUDM8KZSBLTRHoHt4S96he0MD/diYomRQg==
+    username: AgBBBAhEQccZr5LqSlVkmf1w0ciX1XxNInHdoDlzwg/A0gEQNqpO6cBPqHcYd3SAczKBE4zhu72eNgECSDVqQA2Faarof/0G8r0wSz0rqYtLtWS8Z3f3XDUZS+Y1PL25LsTYVzkvQJM4SN3rA96jsBNvPAMGKkpxKtXuQv72k2x/+Kt+wMxhxDRV3PCu0Fp/QbMKKKgGa7QG+749Iu5TzOd4c1DBw2wCGdJX7p8MWMNA9RRNrtJDyIP9f1TVcx93iOWu357q1JN/XP5KxFybjlFeP9MC8NhhQhtMLna8cJUCC8O2/VnqW1xOOEvTwYIcxUHjmpRpCqL02/YgCtvci68z/EtJr269gfkK7vU+rnp4IrfuNiSrajsoSKHxs9GlferO5tS5kSVd1ZGAKkTBRdjq35r0QRSEimHuyFnFvkyH6c1/avEa3eXilzCbdsPYckLkvP4Bgx8Pel0D7qTn0zXJQlg3nPdyObfqS2uZ/VsAqoQKSmBsQlKmjY46FXkbv3ut9/60cwxdKj1B6yyr6ssZEp2y+9JY6lULqiV/xIOYkTpxK7pX/q5skICPcr1TkBagsaGH3O7UN2lF2KcsH/DpSKI3QkNzBHPf/tY/aEan5ZNp44drC6n2XT1s+BmyehAFhV/CuaASV0N8290Nu6tOo0Nx9Rb32oWnSHbehjhEX/wyyPH8zcw8ka8SS8SA+26Dz8xtDPY=
+  template:
+    metadata:
+      labels:
+        cnpg.io/reload: "true"
+      name: budget-db
+      namespace: infra
+    type: kubernetes.io/basic-auth
