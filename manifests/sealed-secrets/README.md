@@ -23,6 +23,10 @@
 | `example-db-app.sealed.yaml` | infra | CNPG роль `example` (throwaway example-api) |
 | `example-api-env.sealed.yaml` | platform | example-api: DATABASE_URL/REDIS_URL/RABBITMQ_URL |
 | `example-api-ai.sealed.yaml` | platform | example-api: `MINIMAX_API_KEY` (ключ модели) |
+| `budget-db.sealed.yaml` | infra | CNPG роль `budget` (см. `../../BUDGET-DEPLOY.md`) |
+| `budget-backend-env.sealed.yaml` | platform | budget-backend: DATABASE_URL/DATABASE_URL_DIRECT/RABBITMQ_URL |
+| `itmaxxing-db.sealed.yaml` | infra | CNPG роль `itmaxxing` (см. `../../ITMAXXING-DEPLOY.md`) |
+| `itmaxxing-backend-env.sealed.yaml` | platform | itmaxxing-backend: DATABASE_URL/DATABASE_URL_DIRECT/LLM_API_KEY |
 
 > RabbitMQ-секрета здесь нет — его генерит оператор (`rabbitmq-default-user`).
 > Три `example-*` секрета — для throwaway-демо (глава 6). Как их запечатать —

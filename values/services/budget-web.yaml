@@ -1,0 +1,64 @@
+# budget-web — budget.outegro.com. Cascading-budget UI + BFF over budget-backend
+# (ClusterIP-only). Shares Outegro ID SSO. `/socket.io` on this host is routed to
+# budget-backend (extraPaths) for the live-sync WebSocket.
+app:
+  name: budget-web
+  image:
+    repository: ghcr.io/outegro/monorepo/budget-web
+    tag: "main" # bumped by CI to the built SHA
+  replicas: 2
+  port: 3000
+  # Front: probe "/" (SSR shell, always 200 while Next is up). Do NOT probe BFF routes —
+  # they proxy budget-backend and a backend blip must not pull budget-web from the LB.
+  livenessPath: /
+  readinessPath: /
+  startupPath: /
+  resources:
+    requests:
+      cpu: 25m
+      memory: 96Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+  # BFF config (all non-secret). auth-backend / budget-backend are ClusterIP :80, same ns.
+  env:
+    - name: NODE_ENV
+      value: "production"
+    - name: AUTH_API_BASE
+      value: "http://auth-backend:80"
+    - name: BUDGET_API_BASE
+      value: "http://budget-backend:80"
+    - name: ID_ORIGIN
+      value: "https://id.outegro.com"
+    - name: PUBLIC_ORIGIN
+      value: "https://budget.outegro.com"
+    - name: COOKIE_DOMAIN
+      value: ".outegro.com"
+    - name: REFRESH_COOKIE
+      value: "outegro_refresh"
+service:
+  type: clusterip+ingress
+ingress:
+  enabled: true
+  className: traefik
+  host: budget.outegro.com
+  tlsSecretName: outegro-wildcard-tls
+  # /socket.io → budget-backend WS gateway (same host, so og_access cookie flows). Listed
+  # before the `/` catch-all → budget-web.
+  extraPaths:
+    - path: /socket.io
+      pathType: Prefix
+      serviceName: budget-backend
+      servicePort: 80
+networkPolicy:
+  enabled: true
+  allowExternalHttps: false
+  # Traefik (kube-system) → pod:3000.
+  extraIngress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - port: 3000
+          protocol: TCP

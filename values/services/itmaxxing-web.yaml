@@ -1,0 +1,56 @@
+# itmaxxing-web — itmaxxing.outegro.com. Lore-intake UI + BFF over itmaxxing-backend
+# (ClusterIP-only). Shares Outegro ID SSO. No WebSocket → plain host ingress, no extraPaths.
+app:
+  name: itmaxxing-web
+  image:
+    repository: ghcr.io/outegro/monorepo/itmaxxing-web
+    tag: "main" # bumped by CI to the built SHA
+  replicas: 2
+  port: 3000
+  # Front: probe "/" (SSR shell, always 200 while Next is up). Do NOT probe BFF routes —
+  # they proxy itmaxxing-backend and a backend blip must not pull itmaxxing-web from the LB.
+  livenessPath: /
+  readinessPath: /
+  startupPath: /
+  resources:
+    requests:
+      cpu: 25m
+      memory: 96Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+  # BFF config (all non-secret). auth-backend / itmaxxing-backend are ClusterIP :80, same ns.
+  env:
+    - name: NODE_ENV
+      value: "production"
+    - name: AUTH_API_BASE
+      value: "http://auth-backend:80"
+    - name: ITMAXXING_API_BASE
+      value: "http://itmaxxing-backend:80"
+    - name: ID_ORIGIN
+      value: "https://id.outegro.com"
+    - name: PUBLIC_ORIGIN
+      value: "https://itmaxxing.outegro.com"
+    - name: COOKIE_DOMAIN
+      value: ".outegro.com"
+    - name: REFRESH_COOKIE
+      value: "outegro_refresh"
+service:
+  type: clusterip+ingress
+ingress:
+  enabled: true
+  className: traefik
+  host: itmaxxing.outegro.com
+  tlsSecretName: outegro-wildcard-tls
+networkPolicy:
+  enabled: true
+  allowExternalHttps: false
+  # Traefik (kube-system) → pod:3000.
+  extraIngress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - port: 3000
+          protocol: TCP
