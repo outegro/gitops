@@ -1,0 +1,60 @@
+# trips-backend — Korea reel catalogue. Instagram reel links (+ a free-text note) → LLM turns
+# the note into a Kakao Local search query → a human confirms which candidate is the real
+# place. Stateless auth (JWKS), own CNPG db. ClusterIP; trips-web BFF reaches it in-cluster.
+app:
+  name: trips-backend
+  image:
+    repository: ghcr.io/outegro/monorepo/trips-backend
+    tag: "main" # bumped by CI to the built SHA
+  # 1 replica: this is a two-person trip tool with a hard deadline, and /reels/process runs a
+  # sequential batch — a second replica would add quota pressure and buy nothing. Raise it if
+  # the service outlives the trip.
+  replicas: 1
+  port: 3000
+  livenessPath: /health
+  readinessPath: /health/deep
+  startupPath: /health
+  resources:
+    requests:
+      cpu: 25m
+      memory: 96Mi
+    limits:
+      cpu: 250m
+      memory: 320Mi
+  # DATABASE_URL / DATABASE_URL_DIRECT / LLM_API_KEY / KAKAO_REST_API_KEY (envFrom).
+  # Both API keys are OPTIONAL on the app side: without Kakao, reels still queue for review
+  # with no candidates; without the LLM key, query extraction is skipped. A missing key
+  # degrades the service, it never stops it booting — which is what let this ship before the
+  # Kakao key existed.
+  envSecretName: trips-backend-env
+  env:
+    - name: NODE_ENV
+      value: "production"
+    # Shares the platform MiniMax key with itmaxxing. Extraction is a short structured-JSON
+    # task, not a reasoning one, so max_tokens is far below itmaxxing's 4096.
+    - name: LLM_BASE_URL
+      value: "https://api.minimax.io/v1"
+    - name: LLM_MODEL
+      value: "MiniMax-M2"
+    - name: LLM_MAX_TOKENS
+      value: "1024"
+    - name: KAKAO_LOCAL_BASE_URL
+      value: "https://dapi.kakao.com"
+service:
+  type: clusterip
+networkPolicy:
+  enabled: true
+  # Two external calls: MiniMax (api.minimax.io) and Kakao Local (dapi.kakao.com).
+  # (JWKS is in-cluster: JWKS_URL defaults to http://auth-backend:80.)
+  allowExternalHttps: true
+# Reuses the minimax_* series already on the AI dashboard — trips calls the same provider,
+# and its extraction volume (~100 reels in a batch) is worth watching for cost.
+serviceMonitor:
+  enabled: true
+  path: /metrics
+  interval: 30s
+# First migration (Reel / Place + reel_status enum) runs as an Argo PreSync Job against
+# DATABASE_URL_DIRECT.
+migration:
+  enabled: true
+  databaseUrlKey: DATABASE_URL_DIRECT

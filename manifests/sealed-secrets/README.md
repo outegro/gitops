@@ -32,6 +32,8 @@
 | `budget-backend-env.sealed.yaml` | platform | budget-backend: DATABASE_URL/DATABASE_URL_DIRECT/RABBITMQ_URL |
 | `itmaxxing-db.sealed.yaml` | infra | CNPG роль `itmaxxing` (см. `../../ITMAXXING-DEPLOY.md`) |
 | `itmaxxing-backend-env.sealed.yaml` | platform | itmaxxing-backend: DATABASE_URL/DATABASE_URL_DIRECT/LLM_API_KEY |
+| `trips-db.sealed.yaml` | infra | CNPG роль `trips` |
+| `trips-backend-env.sealed.yaml` | platform | trips-backend: DATABASE_URL/DATABASE_URL_DIRECT/LLM_API_KEY (+ KAKAO_REST_API_KEY когда появится) |
 
 > RabbitMQ-секрета здесь нет — его генерит оператор (`rabbitmq-default-user`).
 > Секретов `example-*` и `edu-*` здесь больше нет: демо-сервис и edu удалены. Как запечатать —

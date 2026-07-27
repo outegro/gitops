@@ -300,3 +300,63 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: trips-backend
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  project: outegro
+  sources:
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      path: charts/outegro-service
+      helm:
+        releaseName: trips-backend
+        valueFiles:
+          - $values/values/services/trips-backend.yaml
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: trips-web
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  project: outegro
+  sources:
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      path: charts/outegro-service
+      helm:
+        releaseName: trips-web
+        valueFiles:
+          - $values/values/services/trips-web.yaml
+    - repoURL: git@github.com:outegro/gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

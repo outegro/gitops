@@ -86,6 +86,12 @@ spec:
         connectionLimit: 20
         passwordSecret:
           name: itmaxxing-db
+      - name: trips
+        ensure: present
+        login: true
+        connectionLimit: 20
+        passwordSecret:
+          name: trips-db
 ---
 # DB-per-service databases (owner = соответствующая login-роль, НЕ общий `app`).
 apiVersion: postgresql.cnpg.io/v1
@@ -125,7 +131,6 @@ spec:
   connectionLimit: -1
 ---
 apiVersion: postgresql.cnpg.io/v1
-apiVersion: postgresql.cnpg.io/v1
 kind: Database
 metadata:
   name: budget
@@ -147,6 +152,18 @@ spec:
     name: outegro
   name: itmaxxing
   owner: itmaxxing
+  connectionLimit: -1
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: trips
+  namespace: infra
+spec:
+  cluster:
+    name: outegro
+  name: trips
+  owner: trips
   connectionLimit: -1
 ---
 # ── DB-per-service: рабочий шаблон (раскомментируй на каждый новый сервис) ──
