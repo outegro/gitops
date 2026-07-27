@@ -23,6 +23,11 @@ app:
       memory: 256Mi
   # BFF config (all non-secret). auth-backend / trips-backend are ClusterIP :80, same ns.
   env:
+    # Kakao Maps JS SDK key. Public by design — protected by the domain allow-list in the
+    # Kakao console, not by secrecy. NOT NEXT_PUBLIC_: Next inlines those at build time and
+    # this image is built once in CI, so it is served at runtime via /api/config instead.
+    - name: KAKAO_JS_KEY
+      value: "40b04249cd221c7b3d8c06925178512d"
     - name: NODE_ENV
       value: "production"
     - name: AUTH_API_BASE
