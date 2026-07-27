@@ -5,7 +5,7 @@ app:
   name: budget-web
   image:
     repository: ghcr.io/outegro/monorepo/budget-web
-    tag: "389091ddc72f612f9d155d531a7ef38792dd8cc2" # bumped by CI to the built SHA
+    tag: "ba96e27e9a33db2aeddb527ad1416c83417b8bd1" # bumped by CI to the built SHA
   replicas: 2
   port: 3000
   # Front: probe "/" (SSR shell, always 200 while Next is up). Do NOT probe BFF routes —
