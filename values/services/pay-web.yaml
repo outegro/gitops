@@ -3,7 +3,7 @@ app:
   name: pay-web
   image:
     repository: ghcr.io/outegro/monorepo/pay-web
-    tag: "2283f8cc041d716e4d8cc56760e833ecf185acae"
+    tag: "389091ddc72f612f9d155d531a7ef38792dd8cc2"
   # 1 while this is still the static "coming soon" page — 2 replicas of a placeholder were
   # holding 512Mi of a quota that budget/itmaxxing actually needed. Back to 2 as soon as the
   # Lava.top payments work starts and this becomes a real checkout surface.

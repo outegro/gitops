@@ -4,7 +4,7 @@ app:
   name: trips-web
   image:
     repository: ghcr.io/outegro/monorepo/trips-web
-    tag: "main" # bumped by CI to the built SHA
+    tag: "389091ddc72f612f9d155d531a7ef38792dd8cc2" # bumped by CI to the built SHA
   # 2 replicas: unlike the backend this IS the thing being used from a phone in Seoul on a
   # flaky connection, so a rolling restart must never leave it unavailable.
   replicas: 2
