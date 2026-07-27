@@ -3,7 +3,7 @@ app:
   name: payments-backend
   image:
     repository: ghcr.io/outegro/monorepo/payments-backend
-    tag: "389091ddc72f612f9d155d531a7ef38792dd8cc2"
+    tag: "487687fb97c054c2601c8ef271af205b36a73560"
   # 1 while the service is still a scaffold (no domain code, no Prisma models, no tables).
   # Back to 2 when the Lava.top integration lands and it starts holding real payment state.
   replicas: 1
