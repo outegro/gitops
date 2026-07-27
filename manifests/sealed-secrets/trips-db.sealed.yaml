@@ -1,0 +1,17 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: trips-db
+  namespace: infra
+spec:
+  encryptedData:
+    password: AgA9FOEhfoFm9/esPVR12ZU+tu2Gildmwlf+2wJ5Hom1PuId+jlScptbo/c8I5bpAsp/IGWUffSP/6ab1FPkswJlGUemHZIA60NHRpdHZxGf7/6rVdhQFcTsPkVw4/Q+IHc8iyQrqq5dZv2KhWCBqC1aChOhEiya5dxLN6vr+UEb3tHWwdfa9is1BKZIXmnPMgIbSo0hqM/z7I1tINfrFxsAFafPtjCpAjen+ojAzO+mPnJpev11506QdTOajKfDD0qXysdtckKikiL7v8NnQKRKy9CeJn1kWad57wJSqqTzr+XCupvF/8N2RJ20ijwM4iiUBtXaFBBAqronF/yaPlrFqqgp7/5dhZ7BlypFpgLigzXz0DmMxGcNr4rYSXfmiE7fxhfbtvPFss6vf3CCmdxYVmprp1gKmsBYejMS27ZH83ZwrYlv68OGdL/z0a6N1PHMxVSiFwx10xSNq2LybMwLZEz68b7LywzY5AMXlTOlMeHoazpXhETHjTIzSMPEtVDDn59AEOT3pzLfNX4NP76RkrlTMxs7wY3REnorbpRL0Ey6Ju3QSZtdoykZsp/C6VljxUEcjgHIm7UzrfZ9aD6mzVfzZijYnZt0YyJJMJG7aszhVQGSAbe5b/GiCADoeNF/Dip2sHTkbT4cW48jgstdAvvVAvOFiJRjDyT59Nk4VgfqiXs8IfEt00/oKQVNAbc5IGvFazo9aW3N+paGivL47ljnmsBEY2k/Sw1Mmi3w4Q==
+    username: AgC4XsckvZCxxve6Db+vTG061BOfpB5nopohpdk/aHBMNMfkZC1xyEnFKzoYcWTGp/cnTdp4CyzAgQK5bVRJnnNExjJLQYlHZpLAP2Mq4Fxuk1+uOzEJkcftJRFGgBpEMDYyxZkIkRL9pruYjgAEN12dqJ3b2hAbRN3MGh7aoAHsh8IgH7QgTEYGC+i/tuKG8KHcQvAGoiLNQ1ngdxZ/oGYL8c5MKXOxuYoVD1QBG3J+9Jfy2zJhLkwpwoTBrWIaFitKpRUqedx+9UVILHVg/GtsHLL7q99PfzbYRTMOepj2aRi1IISiVsAi0RAW52yw1nhOXzgVgCuOCFMKG6Xo+DONBjnQmgbDWYt5dFqygQcDpY+kAqiLoz8cX9Ffonq6e2ZUhXw6t1auUwJLRzQiE3q4/aHTVzeXg8HTifeaCbzsTWhmlU3y9YTe9wIgZcj0pjaQs0zVJthog7A2jk5XIElAxsUZxOiLAOoDTROoaC3m+QYD3DzDwjV29xOcfXsN7Mi8W/HVhopvNtqWohmx5+RRvmcvTJIGV6Y9bYGY+/We/7X1fL73fCnAP1+YMcSBZNaG+BrATYEbeM6DGUTY0Fbk29RQuP4Yc8u8pj7AEozbSoD9dmZykoX59f+0b2x1ChrTZBocMpqHtjahv5M04oVH5SoIfF6rJLOZFoIGnsVD5ppsIDSlLWquoQR6AWwqVcjcfFtjxQ==
+  template:
+    metadata:
+      labels:
+        cnpg.io/reload: "true"
+      name: trips-db
+      namespace: infra
+    type: kubernetes.io/basic-auth

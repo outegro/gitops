@@ -1,0 +1,58 @@
+# trips-web — trips.outegro.com. Review queue + confirmed places, BFF over trips-backend
+# (ClusterIP-only). Shares Outegro ID SSO. No WebSocket → plain host ingress, no extraPaths.
+app:
+  name: trips-web
+  image:
+    repository: ghcr.io/outegro/monorepo/trips-web
+    tag: "main" # bumped by CI to the built SHA
+  # 2 replicas: unlike the backend this IS the thing being used from a phone in Seoul on a
+  # flaky connection, so a rolling restart must never leave it unavailable.
+  replicas: 2
+  port: 3000
+  # Front: probe "/" (SSR shell, always 200 while Next is up). Do NOT probe BFF routes —
+  # they proxy trips-backend and a backend blip must not pull trips-web from the LB.
+  livenessPath: /
+  readinessPath: /
+  startupPath: /
+  resources:
+    requests:
+      cpu: 25m
+      memory: 96Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+  # BFF config (all non-secret). auth-backend / trips-backend are ClusterIP :80, same ns.
+  env:
+    - name: NODE_ENV
+      value: "production"
+    - name: AUTH_API_BASE
+      value: "http://auth-backend:80"
+    - name: TRIPS_API_BASE
+      value: "http://trips-backend:80"
+    - name: ID_ORIGIN
+      value: "https://id.outegro.com"
+    - name: PUBLIC_ORIGIN
+      value: "https://trips.outegro.com"
+    - name: COOKIE_DOMAIN
+      value: ".outegro.com"
+    - name: REFRESH_COOKIE
+      value: "outegro_refresh"
+service:
+  type: clusterip+ingress
+ingress:
+  enabled: true
+  className: traefik
+  host: trips.outegro.com
+  tlsSecretName: outegro-wildcard-tls
+networkPolicy:
+  enabled: true
+  allowExternalHttps: false
+  # Traefik (kube-system) → pod:3000.
+  extraIngress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - port: 3000
+          protocol: TCP

@@ -21,17 +21,20 @@ spec:
   #   + budget-backend 512 + itmaxxing-backend 640 + itmaxxing-web 2nd replica 256 → 4992Mi
   #   + both PreSync migration Jobs running at once (256 + 320)                  → 5568Mi peak
   # 5568Mi does NOT fit in 5Gi — that peak is precisely what has to stop biting us.
-  # 7Gi leaves the steady state at ~70% and the rollout peak at ~78%, with room for one
-  # more service. The node carries this fine: 15.9Gi allocatable against ~7.4Gi actually
-  # in use, and limits are ceilings that only bind under simultaneous worst-case load.
+  # Raised again to 9Gi for trips (Korea reel catalogue): trips-backend 1x320Mi +
+  # trips-web 2x256Mi = 832Mi steady, and the 7Gi ceiling was already touched at 6400Mi
+  # during the last rolling update (maxSurge 1 per deployment adds a whole extra pod set
+  # while the old one drains). 9Gi puts the steady state near 65% and keeps a rolling
+  # update well clear of the ceiling. The node still carries it: 15.9Gi allocatable
+  # against ~7.4Gi actually in use, and limits are ceilings, not reservations.
   #
   # requests are deliberately left at 3Gi/3 CPU: those ARE reservations and the real
   # post-rollout figure is ~1.9Gi, so the scheduler keeps its honest headroom.
   hard:
     requests.cpu: "3"
     requests.memory: 3Gi
-    limits.cpu: "6500m"
-    limits.memory: 7Gi
+    limits.cpu: "7500m"
+    limits.memory: 9Gi
     pods: "30"
 ---
 apiVersion: v1
