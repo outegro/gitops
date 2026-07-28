@@ -5,7 +5,7 @@ app:
   name: trips-backend
   image:
     repository: ghcr.io/outegro/monorepo/trips-backend
-    tag: "c94c26fc201203623bd61a965896641c1478482c" # bumped by CI to the built SHA
+    tag: "c194273ca02722a80c8f12c5f0497d3aa1c1a528" # bumped by CI to the built SHA
   # 1 replica: this is a two-person trip tool with a hard deadline, and /reels/process runs a
   # sequential batch — a second replica would add quota pressure and buy nothing. Raise it if
   # the service outlives the trip.
