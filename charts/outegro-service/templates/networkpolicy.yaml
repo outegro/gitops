@@ -19,6 +19,20 @@ spec:
       ports:
         - port: {{ .Values.app.port }}
           protocol: TCP
+    {{- if .Values.serviceMonitor.enabled }}
+    # Prometheus scrapes from the `observability` namespace. The same-namespace rule above does
+    # NOT cover it: `podSelector: {}` with no namespaceSelector means "any pod in THIS
+    # namespace", so a ServiceMonitor pointed at a pod behind this policy produced a target that
+    # was created, selected, and then silently dropped at the network layer — TargetDown with a
+    # perfectly healthy pod serving /metrics.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - port: {{ .Values.app.port }}
+          protocol: TCP
+    {{- end }}
     {{- with .Values.networkPolicy.extraIngress }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
